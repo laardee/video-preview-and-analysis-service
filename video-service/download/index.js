@@ -6,7 +6,7 @@ const fs = require('fs-extra');
 const url = require('url');
 const path = require('path');
 const BbPromise = require('bluebird');
-const { createStatus } = require('../../shared/database');
+const { createStatus } = require('../lib/database');
 
 const s3 = new AWS.S3();
 

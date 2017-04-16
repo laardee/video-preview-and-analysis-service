@@ -6,7 +6,7 @@ const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
 const path = require('path');
 
-const { insertLabels } = require('../../shared/database');
+const { insertLabels } = require('../lib/database');
 const { parseS3Event } = require('../../shared/helpers');
 
 const config = {
@@ -23,7 +23,7 @@ const readDir = BbPromise.promisify(fs.readdir);
 const {
   spawnPromise,
   ffmpeg,
-} = require('../../shared/spawn');
+} = require('../lib/spawn');
 
 const createCaptures = (input, output) =>
   spawnPromise(

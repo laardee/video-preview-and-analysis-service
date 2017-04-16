@@ -2,7 +2,7 @@
 
 const verify = require('./verify');
 const message = require('./message');
-const { getSession } = require('../../shared/database');
+const { getSession } = require('../lib/database');
 const { parseS3Event } = require('../../shared/helpers');
 const AWS = require('aws-sdk');
 

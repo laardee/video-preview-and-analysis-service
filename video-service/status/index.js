@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const {
   getStatus,
   getLabels,
-} = require('../../shared/database');
+} = require('../lib/database');
 
 const config = {
   region: AWS.config.region || process.env.SERVERLESS_REGION || 'us-east-1',

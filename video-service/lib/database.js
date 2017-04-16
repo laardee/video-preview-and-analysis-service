@@ -8,20 +8,6 @@ const config = {
 
 const dynamodb = new AWS.DynamoDB.DocumentClient(config);
 
-const getSession = (id) =>
-  dynamodb.get({
-    TableName: process.env.SESSION_TABLE_NAME,
-    Key: {
-      id,
-    },
-  }).promise();
-
-const insertSession = (data) =>
-  dynamodb.put({
-    TableName: process.env.SESSION_TABLE_NAME,
-    Item: data,
-  }).promise();
-
 const insertLabels = (data) => {
   const params =
     Object.assign(
@@ -101,11 +87,7 @@ const getLabels = (id) =>
     }
   }).promise();
 
-
-
 module.exports = {
-  getSession,
-  insertSession,
   createStatus,
   updateStatus,
   insertLabels,

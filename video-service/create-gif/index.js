@@ -5,7 +5,7 @@ const fs = require('fs-extra');
 const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
 const path = require('path');
-const { updateStatus } = require('../../shared/database');
+const { updateStatus } = require('../lib/database');
 
 const config = {
   region: AWS.config.region || process.env.SERVERLESS_REGION || 'us-east-1',
@@ -21,7 +21,7 @@ const remove = BbPromise.promisify(fs.remove);
 const {
   spawnPromise,
   ffmpeg,
-} = require('../../shared/spawn');
+} = require('../lib/spawn');
 
 const createGif = (input, output) =>
   // 10 seconds from start

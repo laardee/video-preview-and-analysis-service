@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const querystring = require('querystring');
 
 const snsQueue = require('../../shared/snsQueue');
-const { insertSession } = require('../../shared/database');
+const { insertSession } = require('../lib/database');
 const uuid = require('uuid');
 
 function sendGif(recipientId, { gif }) {

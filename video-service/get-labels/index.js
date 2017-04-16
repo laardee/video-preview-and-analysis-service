@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 const path = require('path');
 const snsQueue = require('../../shared/snsQueue');
 
-const { insertLabels } = require('../../shared/database');
+const { insertLabels } = require('../lib/database');
 
 const rekognition = new AWS.Rekognition();
 
