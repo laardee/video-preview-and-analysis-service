@@ -1,0 +1,268 @@
+frameworkVersion: ">=1.2.0 <2.0.0"
+
+service: video-service # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  profile: laardee
+  region: us-east-1
+  environment:
+    SERVERLESS_STAGE: ${opt:stage, self:provider.stage}
+    SERVERLESS_PROJECT: ${self:service}
+    SERVERLESS_REGION: ${opt:region, self:provider.region}
+    ACCOUNT: ${self:custom.secrets.ACCOUNT} # Using AWS::Account with SNS fails
+    STATUS_TOPIC: video-status-topic-${opt:stage, self:provider.stage}
+    DOWNLOAD_TOPIC_NAME: video-download-topic-${opt:stage, self:provider.stage}
+    CAPTURE_TOPIC_NAME: video-capture-topic-${opt:stage, self:provider.stage}
+    RENDER_READY_TOPIC_NAME: video-render-ready-topic-${opt:stage, self:provider.stage}
+    RENDER_TOPIC: video-render-topic-${opt:stage, self:provider.stage}
+    DOWNLOAD_BUCKET:
+      Ref: SourceBucket
+    RENDER_BUCKET:
+      Ref: RenderBucket
+    STATUS_TABLE_NAME: video-status-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
+    LABELS_TABLE_NAME: video-labels-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource:
+        - "*"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - "*"
+    - Effect: Allow
+      Action:
+      - dynamodb:*
+      Resource: arn:aws:dynamodb:${self:provider.environment.SERVERLESS_REGION}:*:*
+    - Effect: Allow
+      Action:
+      - SNS:*
+      Resource: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:*:*
+    - Effect: Allow
+      Action:
+      - rekognition:DetectLabels
+      Resource: "*"
+
+package:
+  exclude:
+    - test/**
+    - .git/**
+    - ffmpeg/**
+    - templates
+  include:
+    - ffmpeg/ffmpeg
+  individually: true
+
+functions:
+  status:
+    handler: status/index.handler
+    timeout: 30
+    events:
+      - sns: ${self:provider.environment.STATUS_TOPIC}
+  get-labels:
+    handler: get-labels/index.handler
+    timeout: 15
+    events:
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.CAPTURE_TOPIC_NAME}
+  create-captures:
+    handler: create-captures/index.handler
+    timeout: 60
+    events:
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+  create-gif:
+    handler: create-gif/index.handler
+    timeout: 60
+    events:
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+  download:
+    handler: download/index.handler
+    timeout: 120
+    events:
+      - sns: ${self:provider.environment.RENDER_TOPIC}
+
+plugins:
+  - serverless-mocha-plugin
+  - serverless-plugin-optimize
+
+custom:
+  serverless-mocha-plugin:
+    functionTemplate: templates/function.ejs
+  secrets: ${file(../.secrets.yml)}
+
+resources:
+  Resources:
+    DownloadTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+        TopicName: ${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+    CaptureTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:provider.environment.CAPTURE_TOPIC_NAME}
+        TopicName: ${self:provider.environment.CAPTURE_TOPIC_NAME}
+    RenderReadyTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:provider.environment.RENDER_READY_TOPIC_NAME}
+        TopicName: ${self:provider.environment.RENDER_READY_TOPIC_NAME}
+    DownloadTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Id: DownloadTopicPolicy
+          Version: '2012-10-17'
+          Statement:
+          - Sid: DownloadTopicPolicy-001
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sns:Publish
+            Resource:
+              Ref: DownloadTopic
+        Topics:
+          - Ref: DownloadTopic
+    CaptureTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Id: CaptureTopicPolicy
+          Version: '2012-10-17'
+          Statement:
+          - Sid: CaptureTopicPolicy-001
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sns:Publish
+            Resource:
+              Ref: CaptureTopic
+        Topics:
+          - Ref: CaptureTopic
+    RenderReadyTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Id: RenderReadyTopicPolicy
+          Version: '2012-10-17'
+          Statement:
+          - Sid: RenderReadyTopicPolicy-001
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sns:Publish
+            Resource:
+              Ref: RenderReadyTopic
+        Topics:
+          - Ref: RenderReadyTopic
+    SourceBucket:
+      Type: AWS::S3::Bucket
+      DependsOn:
+        - DownloadTopic
+        - CaptureTopic
+      Properties:
+        AccessControl: BucketOwnerFullControl
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Topic:
+                Ref: DownloadTopic
+              Event: s3:ObjectCreated:*
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: videos/
+            - Topic:
+                Ref: CaptureTopic
+              Event: s3:ObjectCreated:*
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: prefix
+                      Value: captures/
+    RenderBucket:
+      Type: AWS::S3::Bucket
+      DependsOn:
+        - RenderReadyTopic
+      Properties:
+        AccessControl: BucketOwnerFullControl
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Topic:
+                Ref: RenderReadyTopic
+              Event: s3:ObjectCreated:*
+              Filter:
+                S3Key:
+                  Rules:
+                    - Name: suffix
+                      Value: "metadata.json"
+
+    CreateDashgifLambdaInvokePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:InvokeFunction
+        Principal: sns.amazonaws.com
+        SourceArn:
+          Fn::Join:
+            - ":"
+            - - arn:aws:sns
+              - Ref: AWS::Region
+              - Ref: AWS::AccountId
+              - Ref: DownloadTopic
+        FunctionName:
+          Fn::GetAtt:
+          - CreateDashgifLambdaFunction
+          - Arn
+    CreateDashcapturesLambdaInvokePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:InvokeFunction
+        Principal: sns.amazonaws.com
+        SourceArn:
+          Fn::Join:
+            - ":"
+            - - arn:aws:sns
+              - Ref: AWS::Region
+              - Ref: AWS::AccountId
+              - Ref: DownloadTopic
+        FunctionName:
+          Fn::GetAtt:
+          - CreateDashcapturesLambdaFunction
+          - Arn
+    StatusTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.STATUS_TABLE_NAME}
+    LabelsTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: frame
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: frame
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.LABELS_TABLE_NAME}

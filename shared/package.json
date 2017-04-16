@@ -1,0 +1,15 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "",
+  "main": "snsQueue.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "aws-sdk": "^2.41.0",
+    "babel-preset-es2015": "^6.24.1"
+  }
+}
