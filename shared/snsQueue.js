@@ -37,38 +37,30 @@ const getTopicArn = (topicName) =>
  * @param subject
  */
 const sendMessage = (topicName, { message, attributes, subject }) =>
-  new Promise((resolve, reject) => {
-    getTopicArn(topicName)
-      .then((topicArn) => {
-        Object.assign(message, {
-          stage: process.env.SERVERLESS_STAGE,
-        });
-        const snsNotification = {
-          Message: JSON.stringify(message),
-          TopicArn: topicArn,
-        };
+  getTopicArn(topicName)
+    .then((topicArn) => {
+      Object.assign(message, {
+        stage: process.env.SERVERLESS_STAGE,
+      });
+      const snsNotification = {
+        Message: JSON.stringify(message),
+        TopicArn: topicArn,
+      };
 
-        if (attributes) {
-          snsNotification.MessageAttributes = attributes;
-        }
+      if (attributes) {
+        snsNotification.MessageAttributes = attributes;
+      }
 
-        snsNotification.Subject = subject || 'NOTIFICATION';
+      snsNotification.Subject = subject || 'NOTIFICATION';
 
-        if (process.env.SILENT) {
-          return resolve(snsNotification);
-        }
+      if (process.env.SILENT) {
+        return Promise.resolve(snsNotification);
+      }
 
-        return sns.publish(snsNotification, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-
-          snsNotification.messageId = data.MessageId;
-          return resolve(snsNotification);
-        });
-      })
-      .catch(error => reject(error));
-  });
+      return sns.publish(snsNotification).promise()
+        .then(({ MessageId }) =>
+          Object.assign({}, snsNotification, { MessageId }));
+    });
 
 /**
  * Retrieve event (SNS)
