@@ -2,6 +2,10 @@
 
 const path = require('path');
 
+
+const parseSNSEvent = (event) =>
+  JSON.parse(event.Records[0].Sns.Message);
+
 const parseS3Event = (event) => {
   const { bucket, object } = event;
   const { base, dir, name } = path.parse(object.key);
@@ -18,6 +22,13 @@ const parseS3Event = (event) => {
   }
 };
 
+const parseS3SNSEvent = (event) => {
+  const snsMessage = parseSNSEvent(event);
+  return parseS3Event(snsMessage.Records[0].s3);
+};
+
 module.exports = {
+  parseSNSEvent,
   parseS3Event,
+  parseS3SNSEvent,
 };

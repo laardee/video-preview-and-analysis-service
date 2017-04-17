@@ -6,6 +6,7 @@ const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
 const path = require('path');
 const { updateStatus } = require('../lib/database');
+const { parseSNSEvent } = require('../../shared/helpers');
 
 const config = {
   region: AWS.config.region || process.env.SERVERLESS_REGION || 'us-east-1',
@@ -43,36 +44,39 @@ const getSignedUrl = (filename) => new Promise((resolve, reject) => {
 });
 
 module.exports.handler = (event, context, callback) => {
-  const message = JSON.parse(event.Records[0].Sns.Message);
-  const { bucket, object } = message.Records[0].s3;
-  const { base, dir, name } = path.parse(object.key);
-  const id = dir.replace(/videos\//, '');
-  const directory = path.join('/', 'tmp', 'gif', id);
+  const {
+    id,
+    key,
+    bucket,
+    base,
+    name,
+  } = parseSNSEvent(event);
 
+  const directory = path.join('/', 'tmp', 'gif', id);
   const input = path.join(directory, base);
   const output = path.join(directory, `${name}.gif`);
-  const key = `${id}/${name}.gif`;
+  const gif = `${id}/${name}.gif`;
 
   return ensureDir(directory)
     .then(() =>
       s3.getObject({
-        Bucket: bucket.name,
-        Key: object.key,
+        Bucket: bucket,
+        Key: key,
       }).promise())
-    .then((data) => writeFile(input, data.Body))
+    .then(({ Body }) => writeFile(input, Body))
     .then(() => remove(output))
     .then(() => createGif(input, output))
     .then(() =>
       s3.putObject({
         Bucket: process.env.RENDER_BUCKET,
-        Key: key,
+        Key: gif,
         Body: fs.readFileSync(output),
         ContentType: 'image/gif',
       })
         .promise())
-    .then(() => getSignedUrl(key))
+    .then(() => getSignedUrl(gif))
     .then((signedUrl) =>
-      updateStatus({ id, video: object.key, gif: key, signedUrl }))
+      updateStatus({ id, video: key, gif, signedUrl }))
     .then(() =>
       snsQueue.sendMessage(process.env.STATUS_TOPIC, { message: { id } }))
     .then(() => callback(null, 'ok'));

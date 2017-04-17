@@ -7,7 +7,7 @@ const spawn = require('child_process').spawn;
 const path = require('path');
 
 const { insertLabels } = require('../lib/database');
-const { parseS3Event } = require('../../shared/helpers');
+const { parseSNSEvent } = require('../../shared/helpers');
 
 const config = {
   region: AWS.config.region || process.env.SERVERLESS_REGION || 'eu-west-1',
@@ -41,14 +41,13 @@ const saveCapture = ({ bucket, id, base, directory, frame }) =>
     .promise();
 
 module.exports.handler = (event, context, callback) => {
-  const message = JSON.parse(event.Records[0].Sns.Message);
   const {
     id,
-    bucket,
     key,
+    bucket,
     base,
     name,
-  } = parseS3Event(message.Records[0].s3);
+  } = parseSNSEvent(event);
 
   const directory = path.join('/', 'tmp', 'capture', id);
 

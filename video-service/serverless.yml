@@ -13,10 +13,12 @@ provider:
     SERVERLESS_REGION: ${opt:region, self:provider.region}
     ACCOUNT: ${self:custom.secrets.ACCOUNT} # Using AWS::Account with SNS fails
     STATUS_TOPIC: video-status-topic-${opt:stage, self:provider.stage}
-    DOWNLOAD_TOPIC_NAME: video-download-topic-${opt:stage, self:provider.stage}
+#    DOWNLOAD_TOPIC_NAME: video-download-topic-${opt:stage, self:provider.stage}
+    SESSION_TOPIC_NAME: video-session-topic-${opt:stage, self:provider.stage}
     CAPTURE_TOPIC_NAME: video-capture-topic-${opt:stage, self:provider.stage}
+    RENDER_START_TOPIC_NAME: video-render-start-topic-${opt:stage, self:provider.stage}
     RENDER_READY_TOPIC_NAME: video-render-ready-topic-${opt:stage, self:provider.stage}
-    RENDER_TOPIC: video-render-topic-${opt:stage, self:provider.stage}
+    RENDER_TOPIC: video-render-topic-${opt:stage, self:provider.stage} # REMOVE WHEN DOWNLOAD IS MOVED
     DOWNLOAD_BUCKET:
       Ref: SourceBucket
     RENDER_BUCKET:
@@ -60,6 +62,11 @@ package:
   individually: true
 
 functions:
+  create-session:
+    handler: create-session/index.handler
+    timeout: 15
+    events:
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.SESSION_TOPIC_NAME}
   status:
     handler: status/index.handler
     timeout: 30
@@ -74,12 +81,12 @@ functions:
     handler: create-captures/index.handler
     timeout: 60
     events:
-      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
   create-gif:
     handler: create-gif/index.handler
     timeout: 60
     events:
-      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
   download:
     handler: download/index.handler
     timeout: 120
@@ -97,37 +104,47 @@ custom:
 
 resources:
   Resources:
-    DownloadTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        DisplayName: ${self:provider.environment.DOWNLOAD_TOPIC_NAME}
-        TopicName: ${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+#    DownloadTopic:
+#      Type: AWS::SNS::Topic
+#      Properties:
+#        DisplayName: ${self:provider.environment.DOWNLOAD_TOPIC_NAME}
+#        TopicName: ${self:provider.environment.DOWNLOAD_TOPIC_NAME}
     CaptureTopic:
       Type: AWS::SNS::Topic
       Properties:
         DisplayName: ${self:provider.environment.CAPTURE_TOPIC_NAME}
         TopicName: ${self:provider.environment.CAPTURE_TOPIC_NAME}
+    RenderStartTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:provider.environment.RENDER_START_TOPIC_NAME}
+        TopicName: ${self:provider.environment.RENDER_START_TOPIC_NAME}
     RenderReadyTopic:
       Type: AWS::SNS::Topic
       Properties:
         DisplayName: ${self:provider.environment.RENDER_READY_TOPIC_NAME}
         TopicName: ${self:provider.environment.RENDER_READY_TOPIC_NAME}
-    DownloadTopicPolicy:
-      Type: AWS::SNS::TopicPolicy
+    SessionTopic:
+      Type: AWS::SNS::Topic
       Properties:
-        PolicyDocument:
-          Id: DownloadTopicPolicy
-          Version: '2012-10-17'
-          Statement:
-          - Sid: DownloadTopicPolicy-001
-            Effect: Allow
-            Principal:
-              AWS: "*"
-            Action: sns:Publish
-            Resource:
-              Ref: DownloadTopic
-        Topics:
-          - Ref: DownloadTopic
+        DisplayName: ${self:provider.environment.SESSION_TOPIC_NAME}
+        TopicName: ${self:provider.environment.SESSION_TOPIC_NAME}
+#    DownloadTopicPolicy:
+#      Type: AWS::SNS::TopicPolicy
+#      Properties:
+#        PolicyDocument:
+#          Id: DownloadTopicPolicy
+#          Version: '2012-10-17'
+#          Statement:
+#          - Sid: DownloadTopicPolicy-001
+#            Effect: Allow
+#            Principal:
+#              AWS: "*"
+#            Action: sns:Publish
+#            Resource:
+#              Ref: DownloadTopic
+#        Topics:
+#          - Ref: DownloadTopic
     CaptureTopicPolicy:
       Type: AWS::SNS::TopicPolicy
       Properties:
@@ -144,6 +161,22 @@ resources:
               Ref: CaptureTopic
         Topics:
           - Ref: CaptureTopic
+    RenderStartTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Id: RenderStartTopicPolicy
+          Version: '2012-10-17'
+          Statement:
+          - Sid: RenderStartTopicPolicy-001
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sns:Publish
+            Resource:
+              Ref: RenderStartTopic
+        Topics:
+          - Ref: RenderStartTopic
     RenderReadyTopicPolicy:
       Type: AWS::SNS::TopicPolicy
       Properties:
@@ -160,17 +193,33 @@ resources:
               Ref: RenderReadyTopic
         Topics:
           - Ref: RenderReadyTopic
+    SessionTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Id: SessionTopicPolicy
+          Version: '2012-10-17'
+          Statement:
+          - Sid: SessionTopicPolicy-001
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sns:Publish
+            Resource:
+              Ref: SessionTopic
+        Topics:
+          - Ref: SessionTopic
     SourceBucket:
       Type: AWS::S3::Bucket
       DependsOn:
-        - DownloadTopic
+        - SessionTopic
         - CaptureTopic
       Properties:
         AccessControl: BucketOwnerFullControl
         NotificationConfiguration:
           TopicConfigurations:
             - Topic:
-                Ref: DownloadTopic
+                Ref: SessionTopic
               Event: s3:ObjectCreated:*
               Filter:
                 S3Key:
@@ -213,7 +262,7 @@ resources:
             - - arn:aws:sns
               - Ref: AWS::Region
               - Ref: AWS::AccountId
-              - Ref: DownloadTopic
+              - Ref: RenderStartTopic
         FunctionName:
           Fn::GetAtt:
           - CreateDashgifLambdaFunction
@@ -229,7 +278,7 @@ resources:
             - - arn:aws:sns
               - Ref: AWS::Region
               - Ref: AWS::AccountId
-              - Ref: DownloadTopic
+              - Ref: RenderStartTopic
         FunctionName:
           Fn::GetAtt:
           - CreateDashcapturesLambdaFunction
