@@ -66,10 +66,6 @@ const receiveEntries = (entries) => {
             text: 'Please send a video!',
           }));
         } else if (message.message.attachments && message.message.attachments[0].type === 'video') {
-          const topicName = [
-            'video-render-topic',
-            process.env.SERVERLESS_STAGE,
-          ].join('-');
 
           const id = uuid.v4();
           const url = message.message.attachments[0].payload.url;
@@ -81,7 +77,7 @@ const receiveEntries = (entries) => {
             text: `Your video will be processed in no time! ${String.fromCodePoint(0x23F3)}`,
           }));
 
-          messagingResult.push(snsQueue.sendMessage(topicName, {
+          messagingResult.push(snsQueue.sendMessage(process.env.DOWNLOAD_TOPIC, {
             message: notification,
           }).then(() =>
             insertSession(session)));

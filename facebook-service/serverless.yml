@@ -14,9 +14,13 @@ provider:
     SESSION_TABLE_NAME: gif-bot-fb-${self:provider.environment.SERVERLESS_STAGE}
     FACEBOOK_BOT_VERIFY_TOKEN: ${self:custom.secrets.FACEBOOK_BOT_VERIFY_TOKEN}
     FACEBOOK_BOT_PAGE_ACCESS_TOKEN: ${self:custom.secrets.FACEBOOK_BOT_PAGE_ACCESS_TOKEN}
+    DOWNLOAD_TOPIC: gif-bot-download-topic-${opt:stage, self:provider.stage}
+    SOURCE_BUCKET:
+      Fn::ImportValue: video-service-source-bucket-${self:provider.environment.SERVERLESS_STAGE}
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - s3:PutObject
         - s3:GetObject
       Resource:
         - "*"
@@ -46,8 +50,12 @@ functions:
       - http:
           path: facebook
           method: post
-      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:video-render-ready-topic-${opt:stage, self:provider.stage}
-
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:video-render-ready-topic-${opt:stage, self:provider.stage} # fn import value not yet working in serverless
+  download:
+    handler: download/index.handler
+    timeout: 180
+    events:
+      - sns: ${self:provider.environment.DOWNLOAD_TOPIC}
 plugins:
   - serverless-mocha-plugin
   - serverless-plugin-optimize

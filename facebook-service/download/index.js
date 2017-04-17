@@ -6,7 +6,6 @@ const fs = require('fs-extra');
 const url = require('url');
 const path = require('path');
 const BbPromise = require('bluebird');
-// const { createStatus } = require('../lib/database');
 
 const s3 = new AWS.S3();
 
@@ -31,13 +30,11 @@ module.exports.handler = (event, context, callback) => {
       // pass buffer forward?
       .then(() =>
         s3.putObject({
-          Bucket: process.env.DOWNLOAD_BUCKET,
+          Bucket: process.env.SOURCE_BUCKET,
           Key: key,
           Body: fs.readFileSync(file),
           ContentType: 'video/mp4',
         }).promise())
-      // .then(() =>
-      //   createStatus({ id: message.id, video: key }))
       .then(() => callback(null, 'ok'));
   }
 
