@@ -5,7 +5,6 @@ service: video-service # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs6.10
-  profile: laardee
   region: us-east-1
   environment:
     SERVERLESS_STAGE: ${opt:stage, self:provider.stage}
@@ -304,8 +303,8 @@ resources:
           - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         TableName: ${self:provider.environment.STATUS_TABLE_NAME}
     LabelsTable:
       Type: AWS::DynamoDB::Table
@@ -322,6 +321,6 @@ resources:
           - AttributeName: frame
             KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         TableName: ${self:provider.environment.LABELS_TABLE_NAME}

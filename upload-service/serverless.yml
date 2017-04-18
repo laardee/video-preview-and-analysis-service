@@ -5,7 +5,6 @@ service: upload-service # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs6.10
-  profile: laardee
   region: us-east-1
   environment:
     SERVERLESS_STAGE: ${opt:stage, self:provider.stage}
