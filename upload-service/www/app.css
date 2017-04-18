@@ -31,7 +31,7 @@ body {
   font-size: 0.7em;
   font-weight: 700;
   color: white;
-  background-color: #555;
+  background-color: #553333;
   display: inline-block;
 }
 
@@ -39,9 +39,34 @@ body {
 .file-input + label:hover,
 .submit-button:focus,
 .submit-button:hover {
-  background-color: #333;
+  background-color: #775555;
 }
 
 .file-input + label {
   cursor: pointer;
+}
+
+.container {
+  margin: 10px;
+}
+
+#status {
+  padding: 5px;
+  background: #ededed;
+}
+
+#labels-container {
+  padding: 0;
+}
+
+#labels-container li {
+  list-style: none;
+  padding: 5px;
+  background: #ededed;
+  display: inline-block;
+  margin: 2px;
+}
+
+#content > div {
+  margin-top: 10px;
 }

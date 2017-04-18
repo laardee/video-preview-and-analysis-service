@@ -22,7 +22,6 @@ const getMetadata = (session) =>
   fetch(`${api}/metadata/${session}`)
     .then(data => data.json())
     .then((data) => {
-      console.log(data);
       if (data.status === 0) {
         setTimeout(() => refreshMetadata(session), 2000);
       }
@@ -35,68 +34,55 @@ const refreshMetadata = (session) =>
 
 
 const insertSessionToLocalStorage = (data) => {
-  localStorage.setItem(`session-${data.id}`, JSON.stringify(data));
-  refreshList();
+  localStorage.setItem('video-session', JSON.stringify(data));
+  refreshContent();
   return data;
 };
 
-const refreshList = () => {
-  const sessions =
-    Object.keys(localStorage)
-      .filter((key) => key.substr(0,8) === 'session-')
-      .sort()
-      .reverse()
-      .map((session) => {
-        const {
-          id,
-          gifUrl,
-          videoUrl,
-          message,
-          status,
-          labels,
-        } = JSON.parse(localStorage.getItem(session));
-        console.log({
-          id,
-          gifUrl,
-          videoUrl,
-          message,
-          status,
-          labels,
-        });
-        let elements = '';
-        if(status === 1) {
-          const labelsList = labels.map(label => `<li>${label.Name} [${label.Confidence}]</li>`).join('');
-          const videoElement = `<video width="320" height="240" controls src="${videoUrl}"></video>`;
-          const gifElement = `<img src=${gifUrl}>`;
-          const labelsElement = `<ul>${labelsList}</ul>`;
-          elements = `${videoElement}<br>${gifElement}<br>${labelsElement}`;
-        }
-        // else {
-        //   d = `<button class="refresh" id="${id}">Refresh</button>`;
-        // }
+const refreshContent = () => {
+  if (Object.keys(localStorage).indexOf('video-session')>-1) {
+    const {
+      id,
+      gifUrl,
+      videoUrl,
+      message,
+      status,
+      labels,
+    } = JSON.parse(localStorage.getItem('video-session'));
 
-        return `<li><div>${id} - ${message}<br>${elements}</div></li>`;
-      });
-  $('#videos').html(sessions);
+    $('#status').html(`${message} [${id}]`);
+    if(status === 1) {
+      $('#video-container').attr('src', videoUrl);
+      $('#preview-container').attr('src', gifUrl);
+      const labelsList = labels.map(label => `<li>${label.Name} [${label.Confidence}]</li>`).join('');
+      $('#labels-container').html(labelsList);
+    } else {
+      $('#video-container').attr('src', '');
+      $('#preview-container').attr('src', '');
+      $('#labels-container').html('');
+    }
+  }
 };
 
 $(() => {
-  refreshList();
+  refreshContent();
 
   $('body').on('click', 'button.refresh', (event) => {
     const id = $(event.target).attr('id');
     getMetadata(id)
       .then(insertSessionToLocalStorage)
-      .then(refreshList);
+      .then(refreshContent);
+  });
+
+  $('#upload-video #video').change((event) => {
+    const file = $('#upload-video #video')[0].files[0];
+    $('#status').html(`Press Submit to upload ${file.name}`);
   });
 
   $('#upload-video')
     .on('submit', (event) => {
-      const file = $('#upload-video #video')[0].files[0];
-      const formData = new FormData($('#upload-video')[0]);
-      console.log(formData);
       event.preventDefault();
-      console.log('SUBMIT!', event);
+      const file = $('#upload-video #video')[0].files[0];
       fetch(`${api}/signed-url?file=${file.name}`)
         .then((response) => response.json())
         .then((data) => {
