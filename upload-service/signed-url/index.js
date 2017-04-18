@@ -20,8 +20,9 @@ const createResponse = (error, data) => {
 
 module.exports.handler =
   (event, context, callback) => {
+    const file = 'get-from-request.mp4'; // todo get filename from request
     const session = uuidV4();
-    const filename = `${session}/`;
+    const filename = `videos/${session}/${file}`;
     return s3.getSignedUrl('putObject', {
       Bucket: process.env.SOURCE_BUCKET,
       Key: filename,
