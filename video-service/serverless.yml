@@ -53,16 +53,17 @@ package:
   exclude:
     - test/**
     - .git/**
-    - ffmpeg/**
     - templates
-  include:
-    - ffmpeg/ffmpeg
+    - ffmpeg/**
   individually: true
 
 functions:
   create-session:
     handler: create-session/index.handler
     timeout: 15
+    optimize:
+      includePaths:
+        - ffmpeg/ffprobe
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.SESSION_TOPIC_NAME}
   status:
@@ -78,11 +79,17 @@ functions:
   create-captures:
     handler: create-captures/index.handler
     timeout: 60
+    optimize:
+      includePaths:
+        - ffmpeg/ffmpeg
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
   create-gif:
     handler: create-gif/index.handler
     timeout: 60
+    optimize:
+      includePaths:
+        - ffmpeg/ffmpeg
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
 
