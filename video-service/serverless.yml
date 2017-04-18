@@ -61,9 +61,6 @@ functions:
   create-session:
     handler: create-session/index.handler
     timeout: 15
-    optimize:
-      includePaths:
-        - ffmpeg/ffprobe
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.SESSION_TOPIC_NAME}
   status:
@@ -90,6 +87,7 @@ functions:
     optimize:
       includePaths:
         - ffmpeg/ffmpeg
+        - ffmpeg/ffprobe
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
 
