@@ -33,7 +33,6 @@ module.exports.handler = (event, context, callback) => {
 
   return Promise.all(promises)
     .then(([statusItem, labelItems]) => {
-      // save only if no labels yet in status
       const status = statusItem.Item;
       const labels = labelItems.Items;
 
@@ -60,7 +59,11 @@ module.exports.handler = (event, context, callback) => {
         console.log('all labels', JSON.stringify(allLabels));
 
         return updateStatus({ id: status.id, status: 1 })
-          .then(() => ({ url: status.signedUrl, labels: allLabels }));
+          .then(() => ({
+            video: status.video,
+            gif: status.gif,
+            labels: allLabels,
+          }));
       }
 
       return null;

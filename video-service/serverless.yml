@@ -104,6 +104,11 @@ custom:
 
 resources:
   Outputs:
+    RenderBucket:
+      Value:
+        Ref: RenderBucket
+      Export:
+        Name: video-service-render-bucket-${self:provider.environment.SERVERLESS_STAGE}
     SourceBucket:
       Value:
         Ref: SourceBucket
@@ -211,6 +216,18 @@ resources:
         - CaptureTopic
       Properties:
         AccessControl: BucketOwnerFullControl
+        CorsConfiguration:
+          CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+            AllowedOrigins:
+              - '*'
+            ExposedHeaders:
+              - Date
+            Id: CorsRule1
+            MaxAge: '3600'
         NotificationConfiguration:
           TopicConfigurations:
             - Topic:

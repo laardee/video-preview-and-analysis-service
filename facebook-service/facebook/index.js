@@ -8,7 +8,22 @@ const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3();
 
+const getSignedUrl = (filename) => new Promise((resolve, reject) => {
+  s3.getSignedUrl('getObject', {
+    Bucket: process.env.RENDER_BUCKET,
+    Key: filename,
+    Expires: 3600 * 24,
+  }, (error, url) => {
+    if (error) {
+      console.log(error);
+      return reject(error);
+    }
+    return resolve(url);
+  });
+});
+
 module.exports.handler = (event, context, callback) => {
+  console.log(JSON.stringify(event, null, 2))
   if (event.httpMethod === 'GET') {
     return callback(null, verify(event));
   } else if (event.httpMethod === 'POST') {
@@ -38,7 +53,9 @@ module.exports.handler = (event, context, callback) => {
         return getSession(id)
           .then(({ Item }) => {
             const { sender } = Item;
-            return message.sendGif(sender, { gif: metadata.url })
+            return getSignedUrl(metadata.gif)
+              .then(signedUrl =>
+                message.sendGif(sender, { gif: signedUrl }))
               .then(() => {
                 const text =
                   metadata.labels

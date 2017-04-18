@@ -15,6 +15,8 @@ provider:
     FACEBOOK_BOT_VERIFY_TOKEN: ${self:custom.secrets.FACEBOOK_BOT_VERIFY_TOKEN}
     FACEBOOK_BOT_PAGE_ACCESS_TOKEN: ${self:custom.secrets.FACEBOOK_BOT_PAGE_ACCESS_TOKEN}
     DOWNLOAD_TOPIC: gif-bot-download-topic-${opt:stage, self:provider.stage}
+    RENDER_BUCKET:
+      Fn::ImportValue: video-service-render-bucket-${self:provider.environment.SERVERLESS_STAGE}
     SOURCE_BUCKET:
       Fn::ImportValue: video-service-source-bucket-${self:provider.environment.SERVERLESS_STAGE}
   iamRoleStatements:

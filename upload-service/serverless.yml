@@ -11,9 +11,11 @@ provider:
     SERVERLESS_STAGE: ${opt:stage, self:provider.stage}
     SERVERLESS_PROJECT: ${self:service}
     SERVERLESS_REGION: ${opt:region, self:provider.region}
-    SESSIONS_TABLE_NAME: ${self:provider.environment.SERVERLESS_PROJECT}-sessions-${self:provider.environment.SERVERLESS_STAGE}
+    SESSION_TABLE_NAME: ${self:provider.environment.SERVERLESS_PROJECT}-sessions-${self:provider.environment.SERVERLESS_STAGE}
     SOURCE_BUCKET:
       Fn::ImportValue: video-service-source-bucket-${self:provider.environment.SERVERLESS_STAGE}
+    RENDER_BUCKET:
+      Fn::ImportValue: video-service-render-bucket-${self:provider.environment.SERVERLESS_STAGE}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -35,6 +37,18 @@ package:
     - .git/**
 
 functions:
+  status:
+    handler: status/index.handler
+    events:
+      - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:video-render-ready-topic-${opt:stage, self:provider.stage} # fn import value not yet working in serverless
+  get-metadata:
+    handler: get-metadata/index.handler
+    events:
+      - http:
+          path: metadata/{session}
+          method: get
+          cors: true
+    timeout: 30
   signed-url:
     handler: signed-url/index.handler
     events:
@@ -53,6 +67,7 @@ custom:
   serverless-mocha-plugin:
     functionTemplate: templates/function.ejs
   webpackIncludeModules: true
+  secrets: ${file(../.secrets.yml)}
 
 resources:
   Resources:
@@ -69,4 +84,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.SESSIONS_TABLE_NAME}
+        TableName: ${self:provider.environment.SESSION_TABLE_NAME}

@@ -2,6 +2,7 @@
 
 const AWS = require('aws-sdk');
 const uuidV4 = require('uuid/v4');
+const { insertSession } = require('../lib/database');
 
 const s3 = new AWS.S3();
 
@@ -20,12 +21,16 @@ const createResponse = (error, data) => {
 
 module.exports.handler =
   (event, context, callback) => {
-    const file = 'get-from-request.mp4'; // todo get filename from request
+    const file = event.queryStringParameters.file;
     const session = uuidV4();
     const filename = `videos/${session}/${file}`;
-    return s3.getSignedUrl('putObject', {
-      Bucket: process.env.SOURCE_BUCKET,
-      Key: filename,
-    }, (err, url) =>
-      callback(null, createResponse(err, { url, filename })));
+
+    return insertSession({ id: session, status: 0 })
+      .then(() => {
+        s3.getSignedUrl('putObject', {
+          Bucket: process.env.SOURCE_BUCKET,
+          Key: filename,
+        }, (err, url) =>
+          callback(null, createResponse(err, { url, session })));
+      })
   };

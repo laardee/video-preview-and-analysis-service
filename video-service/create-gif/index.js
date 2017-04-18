@@ -29,20 +29,6 @@ const createGif = (input, output) =>
   spawnPromise(spawn(ffmpeg(), (`-t 10 -i ${input} -vf scale=320:-1 ${output}`).split(' ')));
   // -i ${file} -vf setpts=4*PTS ${path.join(directory, `preview-${session}.gif`)}
 
-const getSignedUrl = (filename) => new Promise((resolve, reject) => {
-  s3.getSignedUrl('getObject', {
-    Bucket: process.env.RENDER_BUCKET,
-    Key: filename,
-    Expires: 3600 * 24,
-  }, (error, url) => {
-    if (error) {
-      console.log(error);
-      return reject(error);
-    }
-    return resolve(url);
-  });
-});
-
 module.exports.handler = (event, context, callback) => {
   const {
     id,
@@ -74,9 +60,8 @@ module.exports.handler = (event, context, callback) => {
         ContentType: 'image/gif',
       })
         .promise())
-    .then(() => getSignedUrl(gif))
-    .then((signedUrl) =>
-      updateStatus({ id, video: key, gif, signedUrl }))
+    .then(() =>
+      updateStatus({ id, video: key, gif }))
     .then(() =>
       snsQueue.sendMessage(process.env.STATUS_TOPIC, { message: { id } }))
     .then(() => callback(null, 'ok'));
