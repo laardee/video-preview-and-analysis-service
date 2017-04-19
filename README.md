@@ -8,7 +8,7 @@ This repository includes video service and two use cases, upload service for upl
 
 This project is separated into three parts, video service that generates the gif preview and labels and two optional example services that use the video service.
 
-### Video Service**
+### Video Service
 
 ![Video Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/video-service.png)
 
@@ -24,6 +24,12 @@ This project is separated into three parts, video service that generates the gif
 ### Upload Service 
 
 ![Upload Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/upload-service.png)
+
+1. User request signed URL for uploading video to S3 Bucket. Get Signed Url Lambda function generates URL and creates a session.
+2. User uploads video to S3 Bucket which triggers Video Service to start processing.
+3. Status function catches Render Ready SNS message when Video Service has finished processing video.
+4. The Status function gets metadata from Render Bucket and updates the session.
+5. User request metadata from Get Metadata Lambda function (at the time web sockets are not supported in Api Gateway so polling is used).
 
 ### Facebook Service
 
@@ -51,7 +57,7 @@ If you wish to use Facebook Service, set up the facebook app before deployment.
 
 Copy the page access token and add it to .secrets.yml. as `FACEBOOK_BOT_PAGE_ACCESS_TOKEN`. Also, modify the `FACEBOOK_BOT_VERIFY_TOKEN` as you like.
 
-After deployment set up the webhook using Facebook Service endpoint, something like `https://randomchars.execute-api.us-east-1.amazonaws.com/dev/facebook`. Serverless framework displays it after deployment or alternatively go to facebook-service directory and run `sls info`.
+After deployment set up the webhook using Facebook Service endpoint, something like `https://randomchars.execute-api.us-east-1.amazonaws.com/dev/facebook`. Serverless framework displays it after deployment or alternatively go to the `facebook-service` directory and run `sls info`.
 
 ## Deployment
 
@@ -59,4 +65,4 @@ Upload service and facebook service depends on video service, so it needs to be 
 
 ### Upload Service
 
-Upload service contains a REST API and a very simple web page that can be used to test Video Service. After Upload Service deployment change the `api` variable in the `upload-service/www/app.js` file to point upload service API endpoint.
+Upload service contains a REST API and a very simple web page that can be used to test Video Service. After Upload Service deployment, change the `api` variable in the `upload-service/www/app.js` file to point upload service API endpoint.
