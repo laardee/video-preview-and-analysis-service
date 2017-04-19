@@ -29,11 +29,18 @@ This project is separated into three parts, video service that generates the gif
 2. User uploads video to S3 Bucket which triggers Video Service to start processing.
 3. Status function catches Render Ready SNS message when Video Service has finished processing video.
 4. The Status function gets metadata from Render Bucket and updates the session.
-5. User request metadata from Get Metadata Lambda function (at the time web sockets are not supported in Api Gateway so polling is used).
+5. User request metadata from Get Metadata Lambda function (at the time web sockets are not supported in API Gateway so polling is used).
 
 ### Facebook Service
 
 ![Upload Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/facebook-service.png)
+
+1. Messenger bot user records video and sends it to Messenger service. The video is saved to Facebook CDN and Messenger Service passes the message that contains URL to the video file to API Gateway that triggers Facebook Lambda function.
+2. Facebook Lambda creates a session and sends Download SNS message. After that, it returns ok message to Messenger Service.
+3. Download Lambda function download video to lambda environment and puts it to Source Bucket which triggers Video Service to start processing.
+4. Facebook Lambda function is subscribing Render Ready Topic and when Video Service has finished processing video it downloads metadata and sends GIF image message and labels message to Messenger service which passes messages to Messenger client.
+
+Facebook Messenger bot is verified using GET request to /facebook endpoint.
 
 ## Installation & deployment
 
@@ -65,4 +72,4 @@ Upload service and facebook service depends on video service, so it needs to be 
 
 ### Upload Service
 
-Upload service contains a REST API and a very simple web page that can be used to test Video Service. After Upload Service deployment, change the `api` variable in the `upload-service/www/app.js` file to point upload service API endpoint.
+Upload service contains a REST API and a very simple web page that can be used to test Video Service. After Upload Service deployment, change the `api` variable in the `upload-service/www/app.js` file to point upload service API endpoint. Run `npm start server` to start local test server.
