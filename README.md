@@ -1,8 +1,10 @@
 # Serverless Video Service
 
-This is a serverless event-driven service for creating preview and labels from video file. [FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) labels. 
+This is a serverless event-driven service for creating preview and labels from video file. The most common use case could be video bank that contains short or medium length videos that need to be labeled with previews.
 
-This repository includes video service and two use cases, upload service for uploading a video file from a browser and Facebook bot backend service.
+[FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) labels. 
+
+This repository includes video service and two example use cases, upload service for uploading a video file from the browser and Facebook bot backend service.
 
 ## Architecture
 
@@ -40,9 +42,9 @@ This project is separated into three parts, video service that generates the gif
 3. Download Lambda function download video to lambda environment and puts it to Source Bucket which triggers Video Service to start processing.
 4. Facebook Lambda function is subscribing Render Ready Topic and when Video Service has finished processing video it downloads metadata and sends GIF image message and labels message to Messenger service which passes messages to Messenger client.
 
-Facebook Messenger bot is verified using GET request to /facebook endpoint.
+Messenger Service endpoint is verified using GET request to /facebook endpoint. More about that in Installation & Deployment.
 
-## Installation & deployment
+## Installation & Deployment
 
 Run `npm install` in following directories
 
