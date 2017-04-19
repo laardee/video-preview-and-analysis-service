@@ -93,5 +93,8 @@ module.exports.handler = (event, context, callback) => {
       updateStatus({ id, video: key, gif }))
     .then(() =>
       snsQueue.sendMessage(process.env.STATUS_TOPIC, { message: { id } }))
-    .then(() => callback(null, 'ok'));
+    .then(() => callback(null, 'ok'))
+    .catch((description) =>
+      snsQueue.sendMessage(process.env.RENDER_READY_TOPIC_NAME, { message: { id, error: { description, code: 1 } } })
+        .then(() => callback(error)));
 };

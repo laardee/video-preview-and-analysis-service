@@ -19,7 +19,7 @@ const uploadFile = ({ url, session, file }) =>
   });
 
 const getSessionId = () => {
-  if (Object.keys(localStorage).indexOf('video-session')>-1) {
+  if (Object.keys(localStorage).indexOf('video-session') > -1) {
     return JSON.parse(localStorage.getItem('video-session')).id;
   }
 
@@ -28,7 +28,9 @@ const getSessionId = () => {
 
 const getMetadata = (session) =>
   fetch(`${api}/metadata/${session}`)
-    .then(data => data.json())
+    .then(response => {
+      return response.json()
+    })
     .then((data) => {
       if (data.status === 0) {
         setTimeout(() => {
@@ -63,7 +65,12 @@ const refreshContent = () => {
       labels,
     } = JSON.parse(localStorage.getItem('video-session'));
 
-    $('#status').html(`${message} [${id}]`);
+    if (status === -1) {
+      $('#status').html('Failed to process video');
+    } else {
+      $('#status').html(`${message} [${id}]`);
+    }
+
     if(status === 1) {
       $('#video-container').attr('src', videoUrl);
       $('#preview-container').attr('src', gifUrl);

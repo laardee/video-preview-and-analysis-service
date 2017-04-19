@@ -3,7 +3,7 @@
 const verify = require('./verify');
 const message = require('./message');
 const { getSession } = require('../lib/database');
-const { parseS3Event } = require('../../shared/helpers');
+const { parseS3SNSEvent } = require('../../shared/helpers');
 const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3();
@@ -37,35 +37,41 @@ module.exports.handler = (event, context, callback) => {
         body: JSON.stringify({ error }),
       }));
   } else if (event.Records && event.Records[0] && event.Records[0].Sns) {
-    const snsMessage = JSON.parse(event.Records[0].Sns.Message);
     const {
-      id,
       bucket,
       key,
-    } = parseS3Event(snsMessage.Records[0].s3);
+      id,
+      error,
+    } = parseS3SNSEvent(event);
 
-    return s3.getObject({
-      Bucket: bucket,
-      Key: key,
-    }).promise()
-      .then((metadataObject) => {
-        const metadata = JSON.parse(metadataObject.Body.toString());
-        return getSession(id)
-          .then(({ Item }) => {
-            const { sender } = Item;
-            return getSignedUrl(metadata.gif)
-              .then(signedUrl =>
-                message.sendGif(sender, { gif: signedUrl }))
-              .then(() => {
-                const text =
-                  metadata.labels
-                    .map((label) => label.Name)
-                    .join(', ');
-                return message.sendMessage(sender, { text });
-              });
-          });
-      })
-      .then(() => callback(null, 'ok'));
+    if (!error) {
+      return s3.getObject({
+        Bucket: bucket,
+        Key: key,
+      }).promise()
+        .then((metadataObject) => {
+          const metadata = JSON.parse(metadataObject.Body.toString());
+          return getSession(id)
+            .then(({ Item }) => {
+              const { sender } = Item;
+              return getSignedUrl(metadata.gif)
+                .then(signedUrl =>
+                  message.sendGif(sender, { gif: signedUrl }))
+                .then(() => {
+                  const text =
+                    metadata.labels
+                      .map((label) => label.Name)
+                      .join(', ');
+                  return message.sendMessage(sender, { text });
+                });
+            });
+        })
+        .then(() => callback(null, 'ok'));
+    }
+
+    return getSession(id)
+      .then(({ Item }) =>
+        message.sendMessage(Item.sender, { text: `Failed to process video ${String.fromCodePoint(0x1F61E)}` }));
   }
 
   return callback(null,

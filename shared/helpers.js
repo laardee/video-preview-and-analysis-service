@@ -24,7 +24,11 @@ const parseS3Event = (event) => {
 
 const parseS3SNSEvent = (event) => {
   const snsMessage = parseSNSEvent(event);
-  return parseS3Event(snsMessage.Records[0].s3);
+  if (snsMessage.Records && snsMessage.Records[0].s3) {
+    return parseS3Event(snsMessage.Records[0].s3);
+  }
+
+  return snsMessage;
 };
 
 module.exports = {

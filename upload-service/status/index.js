@@ -1,7 +1,7 @@
 'use strict';
 
 const { parseS3SNSEvent } = require('../../shared/helpers');
-const { insertSession } = require('../lib/database');
+const { updateSession } = require('../lib/database');
 
 const AWS = require('aws-sdk');
 
@@ -12,12 +12,18 @@ module.exports.handler = (event, context, callback) => {
     bucket,
     key,
     id,
+    error,
   } = parseS3SNSEvent(event);
 
-  s3.getObject({
-    Bucket: bucket,
-    Key: key,
-  }).promise()
-    .then((data) => insertSession({ id, status: 1, data }))
-    .then(() => callback(null, 'ok'));
+  if (!error) {
+    return s3.getObject({
+      Bucket: bucket,
+      Key: key,
+    }).promise()
+      .then((data) => updateSession({ id, status: 1, data }))
+      .then(() => callback(null, 'ok'));
+  }
+
+  return updateSession({ id, status: 1, error })
+    .then(() => callback(error.description));
 };

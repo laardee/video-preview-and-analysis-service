@@ -76,6 +76,7 @@ module.exports.handler = (event, context, callback) => {
         body: JSON.stringify({
           message: error,
           status: -1,
+          id: event.pathParameters.session,
         }),
       };
       return callback(null, response);
