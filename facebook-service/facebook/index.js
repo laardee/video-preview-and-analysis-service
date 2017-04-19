@@ -23,7 +23,7 @@ const getSignedUrl = (filename) => new Promise((resolve, reject) => {
 });
 
 module.exports.handler = (event, context, callback) => {
-  console.log(JSON.stringify(event, null, 2))
+  console.log(JSON.stringify(event, null, 2));
   if (event.httpMethod === 'GET') {
     return callback(null, verify(event));
   } else if (event.httpMethod === 'POST') {
@@ -71,7 +71,9 @@ module.exports.handler = (event, context, callback) => {
 
     return getSession(id)
       .then(({ Item }) =>
-        message.sendMessage(Item.sender, { text: `Failed to process video ${String.fromCodePoint(0x1F61E)}` }));
+        message.sendMessage(
+          Item.sender,
+          { text: `Failed to process video ${String.fromCodePoint(0x1F61E)}` }));
   }
 
   return callback(null,

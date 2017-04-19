@@ -10,7 +10,7 @@ const lambdaWrapper = mochaPlugin.lambdaWrapper;
 const expect = mochaPlugin.chai.expect;
 const wrapped = lambdaWrapper.wrap(mod, { handler: 'handler' });
 
-const download = require('./download.json');
+const download = require('./payload.json');
 
 describe('download', () => {
   before((done) => {

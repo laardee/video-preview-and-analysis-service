@@ -66,7 +66,6 @@ const receiveEntries = (entries) => {
             text: 'Please send a video!',
           }));
         } else if (message.message.attachments && message.message.attachments[0].type === 'video') {
-
           const id = uuid.v4();
           const url = message.message.attachments[0].payload.url;
 
