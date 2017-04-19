@@ -4,7 +4,6 @@ const AWS = require('aws-sdk');
 const fs = require('fs-extra');
 const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
-const moment = require('moment');
 const exec = require('child_process').exec;
 
 const path = require('path');
@@ -30,7 +29,7 @@ const {
 
 const probeVideo = (input) => new Promise((resolve) => {
   const cmd = `${ffprobe()} -v quiet -print_format json -show_format "${input}"`;
-  exec(cmd, (error, stdout, stderr) => {
+  exec(cmd, (error, stdout) => {
     resolve(JSON.parse(stdout));
   });
 });
@@ -38,15 +37,15 @@ const probeVideo = (input) => new Promise((resolve) => {
 const createGif = ({ input, output, directory, duration }) => {
   const frames = 10;
   const fps = frames / duration;
-  const command = `-i ${input} -vf scale=320:-1:flags=lanczos,fps=${fps} ${path.join(directory, '%06d.png')}`;
+  const command = `-i ${input} -vf scale=320:-1:flags=lanczos,fps=${fps} ${path.join(directory, '%06d.png')}`; // eslint-disable-line max-len
   console.log(command);
   return spawnPromise(spawn(ffmpeg(), (command).split(' ')))
     .then(() =>
-      spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=6*PTS ${output}`).split(' '))))
+      spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=6*PTS ${output}`).split(' '))));  // eslint-disable-line max-len
 };
 
   // 10 seconds from start
-  //spawnPromise(spawn(ffmpeg(), (`-t 10 -i ${input} -vf scale=320:-1 ${output}`).split(' ')));
+  // spawnPromise(spawn(ffmpeg(), (`-t 10 -i ${input} -vf scale=320:-1 ${output}`).split(' ')));
   // -i ${file} -vf setpts=4*PTS ${path.join(directory, `preview-${session}.gif`)}
 
 module.exports.handler = (event, context, callback) => {
@@ -95,6 +94,6 @@ module.exports.handler = (event, context, callback) => {
       snsQueue.sendMessage(process.env.STATUS_TOPIC, { message: { id } }))
     .then(() => callback(null, 'ok'))
     .catch((description) =>
-      snsQueue.sendMessage(process.env.RENDER_READY_TOPIC_NAME, { message: { id, error: { description, code: 1 } } })
-        .then(() => callback(error)));
+      snsQueue.sendMessage(process.env.RENDER_READY_TOPIC_NAME, { message: { id, error: { description, code: 1 } } }) // eslint-disable-line max-len
+        .catch(error => callback(error)));
 };

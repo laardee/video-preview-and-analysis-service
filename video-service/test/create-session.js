@@ -13,13 +13,10 @@ const wrapped = lambdaWrapper.wrap(mod, { handler: 'handler' });
 describe('create-session', () => {
   before((done) => {
 //  lambdaWrapper.init(liveFunction); // Run the deployed lambda
-
     done();
   });
 
-  it('implement tests here', () => {
-    return wrapped.run({}).then((response) => {
-      expect(response).to.not.be.empty;
-    });
-  });
+  it('implement tests here', () =>
+    wrapped.run({}).then((response) =>
+      expect(response).to.not.be(undefined)));
 });

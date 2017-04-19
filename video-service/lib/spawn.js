@@ -26,9 +26,23 @@ const pad = (number, size) => {
   return result;
 };
 
-const ffmpeg = () => process.env.FFMPEG || path.resolve(process.env.LAMBDA_TASK_ROOT, '_optimize', process.env.AWS_LAMBDA_FUNCTION_NAME, 'ffmpeg/ffmpeg'); //'./ffmpeg/ffmpeg'; // defaults to included ffmpeg binary;
+// defaults to included ffmpeg binary;
+const ffmpeg = () =>
+  process.env.FFMPEG
+    || path.resolve(
+        process.env.LAMBDA_TASK_ROOT,
+        '_optimize',
+        process.env.AWS_LAMBDA_FUNCTION_NAME,
+        'ffmpeg/ffmpeg');
 
-const ffprobe = () => process.env.FFPROBE || path.resolve(process.env.LAMBDA_TASK_ROOT, '_optimize', process.env.AWS_LAMBDA_FUNCTION_NAME, 'ffmpeg/ffprobe'); //'./ffmpeg/ffprobe'; // defaults to included ffmpeg binary;
+// defaults to included ffmpeg binary;
+const ffprobe = () =>
+  process.env.FFPROBE
+    || path.resolve(
+        process.env.LAMBDA_TASK_ROOT,
+        '_optimize',
+        process.env.AWS_LAMBDA_FUNCTION_NAME,
+        'ffmpeg/ffprobe');
 
 module.exports = {
   spawnPromise,

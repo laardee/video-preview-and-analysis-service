@@ -17,7 +17,7 @@ const s3 = new AWS.S3(config);
 const checkIfLabelsExists = (labels) => {
   let exists = true;
   labels.forEach((label) => {
-    if(!label.labels) {
+    if (!label.labels) {
       exists = false;
     }
   });
@@ -41,7 +41,7 @@ module.exports.handler = (event, context, callback) => {
           labelsObject.labels.forEach((label) => {
             const existingLabel = result.filter((l) => l.Name === label.Name)[0];
             if (existingLabel) {
-              if(existingLabel.Confidence < label.Confidence) {
+              if (existingLabel.Confidence < label.Confidence) {
                 // Mutates :grin:
                 existingLabel.Confidence = label.Confidence;
               }
