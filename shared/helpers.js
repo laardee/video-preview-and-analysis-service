@@ -2,7 +2,6 @@
 
 const path = require('path');
 
-
 const parseSNSEvent = (event) =>
   JSON.parse(event.Records[0].Sns.Message);
 
