@@ -18,12 +18,25 @@ const uploadFile = ({ url, session, file }) =>
     reader.readAsArrayBuffer(file);
   });
 
+const getSessionId = () => {
+  if (Object.keys(localStorage).indexOf('video-session')>-1) {
+    return JSON.parse(localStorage.getItem('video-session')).id;
+  }
+
+  return null;
+};
+
 const getMetadata = (session) =>
   fetch(`${api}/metadata/${session}`)
     .then(data => data.json())
     .then((data) => {
       if (data.status === 0) {
-        setTimeout(() => refreshMetadata(session), 2000);
+        setTimeout(() => {
+          const id = getSessionId();
+          if (id) {
+            refreshMetadata(session)
+          }
+        }, 2000);
       }
       return data;
     });
@@ -40,7 +53,7 @@ const insertSessionToLocalStorage = (data) => {
 };
 
 const refreshContent = () => {
-  if (Object.keys(localStorage).indexOf('video-session')>-1) {
+  if (getSessionId()) {
     const {
       id,
       gifUrl,
@@ -65,7 +78,7 @@ const refreshContent = () => {
 };
 
 $(() => {
-  refreshContent();
+  refreshMetadata();
 
   $('body').on('click', 'button.refresh', (event) => {
     const id = $(event.target).attr('id');

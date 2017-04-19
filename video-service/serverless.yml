@@ -1,6 +1,6 @@
 frameworkVersion: ">=1.2.0 <2.0.0"
 
-service: video-service # NOTE: update this with your service name
+service: et-video-service # NOTE: update this with your service name
 
 provider:
   name: aws
@@ -82,7 +82,8 @@ functions:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
   create-gif:
     handler: create-gif/index.handler
-    timeout: 60
+    memorySize: 1536
+    timeout: 240
     optimize:
       includePaths:
         - ffmpeg/ffmpeg

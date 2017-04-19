@@ -36,20 +36,13 @@ const probeVideo = (input) => new Promise((resolve) => {
 });
 
 const createGif = ({ input, output, directory, duration }) => {
-  const frames = 20;
-  const offset = (duration * 1000) / frames;
-  const promises = [];
-  for (let i = 0; i < frames + 1; i++) {
-    const seek = moment(offset * i).utc().format('HH:mm:ss.SSS');
-    const command = `-ss ${seek} -i ${input} -start_number ${i} -vframes 1 -vf scale=320:-1:flags=lanczos ${path.join(directory, '%06d.png')}`;
-    console.log(command);
-    promises.push(
-      spawnPromise(
-        spawn(ffmpeg(), (command).split(' '))))
-  }
-  return Promise.all(promises)
+  const frames = 10;
+  const fps = frames / duration;
+  const command = `-i ${input} -vf scale=320:-1:flags=lanczos,fps=${fps} ${path.join(directory, '%06d.png')}`;
+  console.log(command);
+  return spawnPromise(spawn(ffmpeg(), (command).split(' ')))
     .then(() =>
-      spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=4*PTS ${output}`).split(' '))))
+      spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=6*PTS ${output}`).split(' '))))
 };
 
   // 10 seconds from start

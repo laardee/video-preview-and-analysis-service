@@ -1,6 +1,6 @@
 frameworkVersion: ">=1.2.0 <2.0.0"
 
-service: upload-service # NOTE: update this with your service name
+service: et-upload-service # NOTE: update this with your service name
 
 provider:
   name: aws
