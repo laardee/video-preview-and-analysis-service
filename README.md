@@ -23,6 +23,8 @@ This project is separated into three parts, video service that generates the gif
 
 ### Upload Service 
 
+![Upload Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/upload-service.png)
+
 ### Facebook Service
 
 ## Installation & deployment
