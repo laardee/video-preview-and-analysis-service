@@ -32,5 +32,5 @@ module.exports.handler =
           Key: filename,
         }, (err, url) =>
           callback(null, createResponse(err, { url, session })));
-      })
+      });
   };

@@ -6,7 +6,7 @@ const s3 = new AWS.S3();
 
 const { getSession } = require('../lib/database');
 
-const getSignedUrl = ({key, bucket}) => new Promise((resolve, reject) => {
+const getSignedUrl = ({ key, bucket }) => new Promise((resolve, reject) => {
   s3.getSignedUrl('getObject', {
     Bucket: bucket,
     Key: key,
@@ -29,43 +29,47 @@ module.exports.handler = (event, context, callback) => {
       let data = {};
       let promises = [];
       switch (status) {
-        case 0:
+        case 0: {
           message = 'Processing video';
           break;
-        case 1:
+        }
+        case 1: {
           message = 'Video ready';
           data = JSON.parse(Item.data.Body.toString());
           const gifUrl = getSignedUrl({ key: data.gif, bucket: process.env.RENDER_BUCKET });
           const videoUrl = getSignedUrl({ key: data.video, bucket: process.env.SOURCE_BUCKET });
           promises = [gifUrl, videoUrl];
           break;
-        case -1:
+        }
+        case -1: {
           message = 'Error';
           break;
-        default:
+        }
+        default: {
           message = 'Invalid status';
+        }
       }
 
-    return Promise.all(promises).then(([ gifUrl, videoUrl ]) => {
-      const response = {
-        statusCode: typeof status === 'undefined' || status > -1 ? 200 : 400,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-        },
-        body: JSON.stringify({
-          id,
-          message,
-          status,
-          gifUrl,
-          videoUrl,
-          labels: data.labels,
-        }),
-      };
+      return Promise.all(promises).then(([gifUrl, videoUrl]) => {
+        const response = {
+          statusCode: typeof status === 'undefined' || status > -1 ? 200 : 400,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
+          },
+          body: JSON.stringify({
+            id,
+            message,
+            status,
+            gifUrl,
+            videoUrl,
+            labels: data.labels,
+          }),
+        };
 
-      return callback(null, response);
-    });
-  })
+        return callback(null, response);
+      });
+    })
     .catch((error) => {
       const response = {
         statusCode: 400,
@@ -80,5 +84,5 @@ module.exports.handler = (event, context, callback) => {
         }),
       };
       return callback(null, response);
-  });
+    });
 };

@@ -36,20 +36,19 @@ const insertSession = (data) =>
  */
 const updateSession = (data) => {
   const updateData = Object.keys(data).reduce((result, item) => {
-
     const updateExpressionAttributeName = {};
     const attributeName = `#${item}`;
     updateExpressionAttributeName[attributeName] = item;
-    result.ExpressionAttributeNames =
+    result.ExpressionAttributeNames =     // eslint-disable-line no-param-reassign
       Object.assign({}, result.ExpressionAttributeNames, updateExpressionAttributeName);
 
     const updateExpressionAttributeValue = {};
     const attributeValueName = `:${item}`;
     updateExpressionAttributeValue[attributeValueName] = data[item];
-    result.ExpressionAttributeValues =
+    result.ExpressionAttributeValues =    // eslint-disable-line no-param-reassign
       Object.assign({}, result.ExpressionAttributeValues, updateExpressionAttributeValue);
 
-    if(item !== 'id') {
+    if (item !== 'id') {
       result.UpdateExpression.push(`${attributeName} = ${attributeValueName}`);
     }
 
@@ -66,7 +65,7 @@ const updateSession = (data) => {
     Key: {
       id: data.id,
     },
-    ReturnValues: 'ALL_NEW'
+    ReturnValues: 'ALL_NEW',
   }, {
     ExpressionAttributeNames: updateData.ExpressionAttributeNames,
     ExpressionAttributeValues: updateData.ExpressionAttributeValues,

@@ -3,7 +3,7 @@
 const api = 'https://dmiq0jckrd.execute-api.us-east-1.amazonaws.com/dev';
 
 const uploadFile = ({ url, session, file }) =>
-  new Promise((resolve, reject) => {
+  new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () =>
       fetch(url, {
@@ -26,34 +26,6 @@ const getSessionId = () => {
   return null;
 };
 
-const getMetadata = (session) =>
-  fetch(`${api}/metadata/${session}`)
-    .then(response => {
-      return response.json()
-    })
-    .then((data) => {
-      if (data.status === 0) {
-        setTimeout(() => {
-          const id = getSessionId();
-          if (id) {
-            refreshMetadata(session)
-          }
-        }, 2000);
-      }
-      return data;
-    });
-
-const refreshMetadata = (session) =>
-  getMetadata(session)
-    .then(insertSessionToLocalStorage);
-
-
-const insertSessionToLocalStorage = (data) => {
-  localStorage.setItem('video-session', JSON.stringify(data));
-  refreshContent();
-  return data;
-};
-
 const refreshContent = () => {
   if (getSessionId()) {
     const {
@@ -71,10 +43,11 @@ const refreshContent = () => {
       $('#status').html(`${message} [${id}]`);
     }
 
-    if(status === 1) {
+    if (status === 1) {
       $('#video-container').attr('src', videoUrl);
       $('#preview-container').attr('src', gifUrl);
-      const labelsList = labels.map(label => `<li>${label.Name} [${label.Confidence}]</li>`).join('');
+      const labelsList =
+        labels.map(label => `<li>${label.Name} [${label.Confidence}]</li>`).join('');
       $('#labels-container').html(labelsList);
     } else {
       $('#video-container').attr('src', '');
@@ -83,6 +56,31 @@ const refreshContent = () => {
     }
   }
 };
+
+const insertSessionToLocalStorage = (data) => {
+  localStorage.setItem('video-session', JSON.stringify(data));
+  refreshContent();
+  return data;
+};
+
+const refreshMetadata = (session) =>
+  getMetadata(session) // eslint-disable-line  no-use-before-define
+    .then(insertSessionToLocalStorage);
+
+const getMetadata = (session) =>
+  fetch(`${api}/metadata/${session}`)
+    .then(response => response.json())
+    .then((data) => {
+      if (data.status === 0) {
+        setTimeout(() => {
+          const id = getSessionId();
+          if (id) {
+            refreshMetadata(session);
+          }
+        }, 2000);
+      }
+      return data;
+    });
 
 $(() => {
   refreshMetadata();
@@ -94,7 +92,7 @@ $(() => {
       .then(refreshContent);
   });
 
-  $('#upload-video #video').change((event) => {
+  $('#upload-video #video').change(() => {
     const file = $('#upload-video #video')[0].files[0];
     $('#status').html(`Press Submit to upload ${file.name}`);
   });
