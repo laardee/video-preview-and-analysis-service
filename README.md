@@ -27,6 +27,8 @@ This project is separated into three parts, video service that generates the gif
 
 ### Facebook Service
 
+![Upload Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/facebook-service.png)
+
 ## Installation & deployment
 
 Run `npm install` in following directories
