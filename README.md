@@ -1,6 +1,6 @@
 # Serverless Video Service
 
-This is a serverless event-driven service for creating preview and labels from video file. The most common use case could be video bank for short or medium length videos that need to be labeled with previews when uploaded to service.
+This is a serverless event-driven service for creating preview and labels from video file. The most common use case could be video bank for short or medium length videos that need to be labeled with previews when uploaded to service. I use this with my RaspberryPi that records videos from various locations.
 
 [FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) labels. 
 
@@ -70,7 +70,9 @@ After deployment set up the webhook using Facebook Service endpoint, something l
 
 ## Deployment
 
-Upload service and facebook service depends on video service, so it needs to be deployed first.  To deploy all services run `./deploy.sh` located in project root directory.
+Upload service and facebook service depends on video service, so it needs to be deployed first.  To deploy all services run `./deploy.sh` located in project root directory. 
+
+When deleting resources from AWS, reversed order should be used. First upload service and/or facebook service then video service.
 
 ### Upload Service
 

@@ -20,8 +20,8 @@ provider:
       Ref: SourceBucket
     RENDER_BUCKET:
       Ref: RenderBucket
-    STATUS_TABLE_NAME: video-status-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
-    LABELS_TABLE_NAME: video-labels-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
+    SESSION_TABLE_NAME: ${self:provider.environment.SERVERLESS_PROJECT}-session-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
+    LABELS_TABLE_NAME: ${self:provider.environment.SERVERLESS_PROJECT}-labels-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -306,7 +306,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-        TableName: ${self:provider.environment.STATUS_TABLE_NAME}
+        TableName: ${self:provider.environment.SESSION_TABLE_NAME}
     LabelsTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete

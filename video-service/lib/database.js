@@ -19,7 +19,7 @@ const insertLabels = (data) => {
 const createStatus = (data) => {
   const params =
     Object.assign(
-      { TableName: process.env.STATUS_TABLE_NAME },
+      { TableName: process.env.SESSION_TABLE_NAME },
       { Item: Object.assign({ status: 0 }, data) });
   return dynamodb.put(params).promise();
 };
@@ -49,7 +49,7 @@ const updateStatus = (data) => {
   });
 
   const params = Object.assign({
-    TableName: process.env.STATUS_TABLE_NAME,
+    TableName: process.env.SESSION_TABLE_NAME,
     Key: {
       id: data.id,
     },
@@ -66,7 +66,7 @@ const updateStatus = (data) => {
 
 const getStatus = (id) =>
   dynamodb.get({
-    TableName: process.env.STATUS_TABLE_NAME,
+    TableName: process.env.SESSION_TABLE_NAME,
     Key: {
       id,
     },

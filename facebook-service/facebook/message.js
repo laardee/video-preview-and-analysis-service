@@ -63,7 +63,7 @@ const receiveEntries = (entries) => {
       if (message.sender && message.sender.id && message.message) {
         if (message.message.text) {
           messagingResult.push(sendMessage(message.sender.id, {
-            text: 'Please send a video!',
+            text: `Please send a video! ${String.fromCodePoint(0x1F4F9)}`,
           }));
         } else if (message.message.attachments && message.message.attachments[0].type === 'video') {
           const id = uuid.v4();
