@@ -41,7 +41,7 @@ const createGif = ({ input, output, directory, duration }) => {
   console.log(command);
   return spawnPromise(spawn(ffmpeg(), (command).split(' ')))
     .then(() =>
-      spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=6*PTS ${output}`).split(' '))));  // eslint-disable-line max-len
+      spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=50*PTS ${output}`).split(' '))));  // eslint-disable-line max-len
 };
 
   // 10 seconds from start
