@@ -216,6 +216,11 @@ resources:
         - CaptureTopic
       Properties:
         AccessControl: BucketOwnerFullControl
+        # clean the bucket
+        LifecycleConfiguration:
+          Rules:
+          - ExpirationInDays: 1
+            Status: Enabled
         CorsConfiguration:
           CorsRules:
           - AllowedHeaders:
@@ -252,6 +257,11 @@ resources:
         - RenderReadyTopic
       Properties:
         AccessControl: BucketOwnerFullControl
+        # clean the bucket
+        LifecycleConfiguration:
+          Rules:
+          - ExpirationInDays: 1
+            Status: Enabled
         NotificationConfiguration:
           TopicConfigurations:
             - Topic:
