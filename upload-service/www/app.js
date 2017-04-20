@@ -1,6 +1,7 @@
 'use strict';
 
-const api = 'https://dmiq0jckrd.execute-api.us-east-1.amazonaws.com/dev';
+// change the API endpoint!
+const api = 'https://randomchars.execute-api.us-east-1.amazonaws.com/dev';
 
 const uploadFile = ({ url, session, file }) =>
   new Promise((resolve) => {

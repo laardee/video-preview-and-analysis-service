@@ -6,7 +6,7 @@ const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
 const path = require('path');
 
-const { insertLabels } = require('../lib/database');
+const { insertLabels, updateStatus } = require('../lib/database');
 const { parseSNSEvent } = require('../../shared/helpers');
 const { getDuration } = require('../lib');
 
@@ -60,7 +60,8 @@ module.exports.handler = (event, context, callback) => {
 
   const input = path.join(directory, base);
   const output = path.join(directory, `${name}-%04d.png`);
-  return ensureDir(directory)
+  return updateStatus({ id, captures: 0 })
+    .then(() => ensureDir(directory))
     .then(() =>
       s3.getObject({
         Bucket: bucket,
@@ -85,5 +86,6 @@ module.exports.handler = (event, context, callback) => {
             }).then(() => insertLabels({ id, frame })));
       return Promise.all(promises);
     })
+    .then(() => updateStatus({ id, captures: 1 }))
     .then(() => callback(null, 'ok'));
 };

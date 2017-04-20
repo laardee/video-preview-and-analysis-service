@@ -36,7 +36,7 @@ module.exports.handler = (event, context, callback) => {
       const status = statusItem.Item;
       const labels = labelItems.Items;
 
-      if (status.status === 0 && status.gif && checkIfLabelsExists(labels)) {
+      if (status.status === 0 && status.gif && status.captures === 1 && checkIfLabelsExists(labels)) {
         const allLabels = labels.reduce((result, labelsObject) => {
           labelsObject.labels.forEach((label) => {
             const existingLabel = result.filter((l) => l.Name === label.Name)[0];

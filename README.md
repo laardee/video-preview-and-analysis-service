@@ -6,6 +6,8 @@ This is a serverless event-driven service for creating preview and labels from v
 
 This repository includes video service and two example use cases, upload service for uploading a video file from the browser and Facebook bot backend service.
 
+Live example: https://laardee.github.io/video-service-web/
+
 ## Architecture
 
 This project is separated into three parts, video service that generates the gif preview and labels and two optional example services that use the video service.
