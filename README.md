@@ -77,3 +77,8 @@ When deleting resources from AWS, reversed order should be used. First upload se
 ### Upload Service
 
 Upload service contains a REST API and a very simple web page that can be used to test Video Service. After Upload Service deployment, change the `api` variable in the `upload-service/www/app.js` file to point upload service API endpoint. Run `npm start server` to start local test server.
+
+
+**License**
+
+Copyright (c) 2017 Eetu Tuomala, licensed for users and contributors under [MIT license](https://github.com/laardee/video-service/blob/master/LICENSE).

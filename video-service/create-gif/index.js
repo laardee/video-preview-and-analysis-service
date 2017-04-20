@@ -4,7 +4,6 @@ const AWS = require('aws-sdk');
 const fs = require('fs-extra');
 const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
-const exec = require('child_process').exec;
 
 const path = require('path');
 const { updateStatus } = require('../lib/database');
@@ -24,20 +23,19 @@ const remove = BbPromise.promisify(fs.remove);
 const {
   spawnPromise,
   ffmpeg,
-  ffprobe,
 } = require('../lib/spawn');
 
-const probeVideo = (input) => new Promise((resolve) => {
-  const cmd = `${ffprobe()} -v quiet -print_format json -show_format "${input}"`;
-  exec(cmd, (error, stdout) => {
-    resolve(JSON.parse(stdout));
-  });
-});
+const { getDuration } = require('../lib');
 
 const createGif = ({ input, output, directory, duration }) => {
+  const maxDuration =
+    process.env.VIDEO_MAX_DURATION && process.env.VIDEO_MAX_DURATION > 0
+      ? process.env.VIDEO_MAX_DURATION
+      : duration;
+
   const frames = 10;
-  const fps = frames / duration;
-  const command = `-i ${input} -vf scale=320:-1:flags=lanczos,fps=${fps} ${path.join(directory, '%06d.png')}`; // eslint-disable-line max-len
+  const fps = frames / maxDuration;
+  const command = `-t ${maxDuration} -i ${input} -vf scale=320:-1:flags=lanczos,fps=${fps} ${path.join(directory, '%06d.png')}`; // eslint-disable-line max-len
   console.log(command);
   return spawnPromise(spawn(ffmpeg(), (command).split(' ')))
     .then(() =>
@@ -70,15 +68,7 @@ module.exports.handler = (event, context, callback) => {
       }).promise())
     .then(({ Body }) => writeFile(input, Body))
     .then(() => remove(output))
-    .then(() => probeVideo(input))
-    .then((data) => {
-      console.log(JSON.stringify(data, null, 2));
-      if (Object.keys(data).length === 0 && data.constructor === Object) {
-        return Promise.reject('Failed to read video properties');
-      }
-
-      return parseFloat(data.format.duration);
-    })
+    .then(() => getDuration(input))
     .then(duration => createGif({ input, output, directory, duration }))
     .then(() =>
       s3.putObject({

@@ -22,6 +22,7 @@ provider:
       Ref: RenderBucket
     SESSION_TABLE_NAME: ${self:provider.environment.SERVERLESS_PROJECT}-session-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
     LABELS_TABLE_NAME: ${self:provider.environment.SERVERLESS_PROJECT}-labels-${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE}
+    VIDEO_MAX_DURATION: 30 # (in seconds) limit video duration (0 = no limit)
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -78,6 +79,7 @@ functions:
     optimize:
       includePaths:
         - ffmpeg/ffmpeg
+        - ffmpeg/ffprobe
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.RENDER_START_TOPIC_NAME}
   create-gif:

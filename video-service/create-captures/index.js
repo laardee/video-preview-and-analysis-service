@@ -8,6 +8,7 @@ const path = require('path');
 
 const { insertLabels } = require('../lib/database');
 const { parseSNSEvent } = require('../../shared/helpers');
+const { getDuration } = require('../lib');
 
 const config = {
   region: AWS.config.region || process.env.SERVERLESS_REGION || 'eu-west-1',
@@ -25,11 +26,17 @@ const {
   ffmpeg,
 } = require('../lib/spawn');
 
-const createCaptures = (input, output) =>
-  spawnPromise(
+const createCaptures = ({ input, output, duration }) => {
+  const maxDuration =
+    process.env.VIDEO_MAX_DURATION && process.env.VIDEO_MAX_DURATION > 0
+      ? process.env.VIDEO_MAX_DURATION
+      : duration;
+
+  return spawnPromise(
     spawn(
       ffmpeg(),
-      (`-skip_frame nokey -i ${input} -vsync 0 -r 30 -vf scale=320:-1 ${output}`).split(' ')));
+      (`-t ${maxDuration} -skip_frame nokey -i ${input} -vsync 0 -r 30 -vf scale=640:-1 ${output}`).split(' '))); // eslint-disable-line max-len
+};
 
 const saveCapture = ({ bucket, id, base, directory, frame }) =>
   s3.putObject({
@@ -61,7 +68,8 @@ module.exports.handler = (event, context, callback) => {
       }).promise())
     .then(({ Body }) => writeFile(input, Body))
     .then(() => remove(output))
-    .then(() => createCaptures(input, output))
+    .then(() => getDuration(input))
+    .then(duration => createCaptures({ input, output, duration }))
     .then(() => readDir(directory))
     .then((files) => {
       const promises =
