@@ -3,6 +3,7 @@
 const AWS = require('aws-sdk');
 const uuidV4 = require('uuid/v4');
 const { insertSession } = require('../lib/database');
+const path = require('path');
 
 const s3 = new AWS.S3();
 
@@ -21,7 +22,8 @@ const createResponse = (error, data) => {
 
 module.exports.handler =
   (event, context, callback) => {
-    const file = event.queryStringParameters.file;
+    const { ext } = path.parse(event.queryStringParameters.file);
+    const file = `${uuidV4()}${ext}`;
     const session = uuidV4();
     const filename = `videos/${session}/${file}`;
 
