@@ -71,12 +71,13 @@ functions:
       - schedule: rate(1 minute)
   get-labels:
     handler: get-labels/index.handler
-    timeout: 15
+    timeout: 30
     events:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:${self:provider.environment.CAPTURE_TOPIC_NAME}
   create-captures:
     handler: create-captures/index.handler
-    timeout: 60
+    memorySize: 1536
+    timeout: 300
     optimize:
       includePaths:
         - ffmpeg/ffmpeg
@@ -86,7 +87,7 @@ functions:
   create-gif:
     handler: create-gif/index.handler
     memorySize: 1536
-    timeout: 240
+    timeout: 300
     optimize:
       includePaths:
         - ffmpeg/ffmpeg

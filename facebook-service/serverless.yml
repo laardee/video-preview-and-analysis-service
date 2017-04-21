@@ -54,7 +54,7 @@ functions:
       - sns: arn:aws:sns:${self:provider.environment.SERVERLESS_REGION}:${self:custom.secrets.ACCOUNT}:video-render-ready-topic-${opt:stage, self:provider.stage} # fn import value not yet working in serverless
   download:
     handler: download/index.handler
-    timeout: 180
+    timeout: 300
     events:
       - sns: ${self:provider.environment.DOWNLOAD_TOPIC}
 plugins:
