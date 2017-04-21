@@ -63,7 +63,7 @@ const refreshContent = () => {
 };
 
 const insertSessionToLocalStorage = (data) => {
-  if(data) {
+  if (data) {
     localStorage.setItem('video-session', JSON.stringify(data));
     refreshContent();
   }
