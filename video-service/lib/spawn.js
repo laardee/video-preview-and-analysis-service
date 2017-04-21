@@ -2,6 +2,10 @@
 
 const path = require('path');
 
+/**
+ * Promisified spawn process
+ * @param spawnProcess
+ */
 const spawnPromise = (spawnProcess) => new Promise((resolve, reject) => {
   spawnProcess.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
@@ -20,13 +24,21 @@ const spawnPromise = (spawnProcess) => new Promise((resolve, reject) => {
   });
 });
 
+/**
+ * Left pads number with zeros
+ * @param number
+ * @param size
+ * @returns {string}
+ */
 const pad = (number, size) => {
   let result = `${number}`;
   while (result.length < size) result = `0${result}`;
   return result;
 };
 
-// defaults to included ffmpeg binary;
+/**
+ * returns FFMPEG, defaults to included ffmpeg binary
+ */
 const ffmpeg = () =>
   process.env.FFMPEG
     || path.resolve(
@@ -35,7 +47,9 @@ const ffmpeg = () =>
         process.env.AWS_LAMBDA_FUNCTION_NAME,
         'ffmpeg/ffmpeg');
 
-// defaults to included ffmpeg binary;
+/**
+ * returns FFPROBE, defaults to included ffprobe binary
+ */
 const ffprobe = () =>
   process.env.FFPROBE
     || path.resolve(

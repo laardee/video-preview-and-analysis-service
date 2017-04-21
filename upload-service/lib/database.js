@@ -39,20 +39,20 @@ const updateSession = (data) => {
     const updateExpressionAttributeName = {};
     const attributeName = `#${item}`;
     updateExpressionAttributeName[attributeName] = item;
-    result.ExpressionAttributeNames =     // eslint-disable-line no-param-reassign
+    const ExpressionAttributeNames =
       Object.assign({}, result.ExpressionAttributeNames, updateExpressionAttributeName);
 
     const updateExpressionAttributeValue = {};
     const attributeValueName = `:${item}`;
     updateExpressionAttributeValue[attributeValueName] = data[item];
-    result.ExpressionAttributeValues =    // eslint-disable-line no-param-reassign
+    const ExpressionAttributeValues =
       Object.assign({}, result.ExpressionAttributeValues, updateExpressionAttributeValue);
 
     if (item !== 'id') {
       result.UpdateExpression.push(`${attributeName} = ${attributeValueName}`);
     }
 
-    return result;
+    return Object.assign({}, result, { ExpressionAttributeNames }, { ExpressionAttributeValues });
   }, {
     ExpressionAttributeNames: {},
     ExpressionAttributeValues: {},

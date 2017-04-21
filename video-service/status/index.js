@@ -17,6 +17,10 @@ const config = {
 
 const s3 = new AWS.S3(config);
 
+/**
+ * Checks if labels are saved
+ * @param labels
+ */
 const checkIfLabelsExists = (labels) =>
   labels.reduce((result, label) => {
     if (Object.keys(label).indexOf('labels') === -1) {
@@ -25,6 +29,10 @@ const checkIfLabelsExists = (labels) =>
     return result;
   }, true);
 
+/**
+ * Saves metadata json to S3 Bucket
+ * @param session
+ */
 const saveMetadata = (session) =>
   getLabels(session.id)
     .then(({ Items: labels }) => {
@@ -74,6 +82,13 @@ const saveMetadata = (session) =>
       return null;
     });
 
+/**
+ * Handles status events
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {Promise.<TResult>}
+ */
 module.exports.handler = (event, context, callback) => {
   console.log(JSON.stringify(event, null, 2));
   if (event.Records && event.Records[0].Sns) {

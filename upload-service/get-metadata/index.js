@@ -7,6 +7,11 @@ const s3 = new AWS.S3();
 const { getSession } = require('../lib/database');
 const { sendMessage } = require('../../shared/snsQueue');
 
+/**
+ * Returns signed URL
+ * @param key
+ * @param bucket
+ */
 const getSignedUrl = ({ key, bucket }) => new Promise((resolve, reject) => {
   s3.getSignedUrl('getObject', {
     Bucket: bucket,
@@ -21,6 +26,13 @@ const getSignedUrl = ({ key, bucket }) => new Promise((resolve, reject) => {
   });
 });
 
+/**
+ * Handles metadata endpoint
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {Promise.<T>}
+ */
 module.exports.handler = (event, context, callback) => {
   console.log(JSON.stringify(event, null, 2));
   return getSession(event.pathParameters.session)

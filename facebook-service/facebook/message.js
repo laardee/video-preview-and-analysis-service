@@ -7,6 +7,12 @@ const snsQueue = require('../../shared/snsQueue');
 const { insertSession } = require('../lib/database');
 const uuid = require('uuid');
 
+/**
+ * Sends GIF to Messenger Service
+ * @param recipientId
+ * @param gif
+ * @returns {*|Promise}
+ */
 function sendGif(recipientId, { gif }) {
   const message = {
     attachment: {
@@ -31,6 +37,12 @@ function sendGif(recipientId, { gif }) {
     });
 }
 
+/**
+ * Sends plain message to Messenger Service
+ * @param recipientId
+ * @param result
+ * @returns {*|Promise}
+ */
 const sendMessage = (recipientId, result) => {
   const message = { text: result.text };
 
@@ -57,6 +69,11 @@ const sendMessage = (recipientId, result) => {
     });
 };
 
+/**
+ * Receives messages from Messenger Service
+ * @param entries
+ * @returns {Promise.<*>}
+ */
 const receiveEntries = (entries) => {
   const messages = entries.reduce((entriesResult, entry) => {
     entriesResult.push(entry.messaging.reduce((messagingResult, message) => {

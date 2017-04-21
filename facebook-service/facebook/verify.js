@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * Verifies Messenger Token
+ * @param queryStringParameters
+ * @returns {*}
+ */
 module.exports = ({ queryStringParameters }) => {
   const verifyToken = queryStringParameters['hub.verify_token'];
   const challenge = queryStringParameters['hub.challenge'];

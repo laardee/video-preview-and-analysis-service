@@ -7,6 +7,13 @@ const path = require('path');
 
 const s3 = new AWS.S3();
 
+/**
+ * Downloads file from Facebook CDN and puts it to S3 Bucket
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {*}
+ */
 module.exports.handler = (event, context, callback) => {
   if (event.Records && event.Records[0].Sns) {
     const notification = event.Records[0].Sns;

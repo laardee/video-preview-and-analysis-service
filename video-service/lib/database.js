@@ -8,6 +8,10 @@ const config = {
 
 const dynamodb = new AWS.DynamoDB.DocumentClient(config);
 
+/**
+ * Inserts labels
+ * @param data
+ */
 const insertLabels = (data) => {
   const params =
     Object.assign(
@@ -16,6 +20,29 @@ const insertLabels = (data) => {
   return dynamodb.put(params).promise();
 };
 
+/**
+ * Returns labels
+ * @param id
+ */
+const getLabels = (id) =>
+  dynamodb.scan({
+    TableName: process.env.LABELS_TABLE_NAME,
+    ProjectionExpression: '#id, #frame, #labels',
+    FilterExpression: '#id = :id',
+    ExpressionAttributeNames: {
+      '#id': 'id',
+      '#frame': 'frame',
+      '#labels': 'labels',
+    },
+    ExpressionAttributeValues: {
+      ':id': id,
+    },
+  }).promise();
+
+/**
+ * Creates session
+ * @param data
+ */
 const createStatus = (data) => {
   const params =
     Object.assign(
@@ -24,6 +51,9 @@ const createStatus = (data) => {
   return dynamodb.put(params).promise();
 };
 
+/**
+ * Returns open sessions
+ */
 const getOpenStatuses = () =>
   dynamodb.scan({
     TableName: process.env.SESSION_TABLE_NAME,
@@ -42,24 +72,28 @@ const getOpenStatuses = () =>
     },
   }).promise();
 
+/**
+ * Updates session
+ * @param data
+ */
 const updateStatus = (data) => {
   const updateData = Object.keys(data).reduce((result, item) => {
+    const ExpressionAttributeNames = Object.assign({}, result.ExpressionAttributeNames);
+    const ExpressionAttributeValues = Object.assign({}, result.ExpressionAttributeValues);
     if (item !== 'id') {
       const updateExpressionAttributeName = {};
       const attributeName = `#${item}`;
       updateExpressionAttributeName[attributeName] = item;
-      result.ExpressionAttributeNames =     // eslint-disable-line no-param-reassign
-        Object.assign({}, result.ExpressionAttributeNames, updateExpressionAttributeName);
+      Object.assign(ExpressionAttributeNames, updateExpressionAttributeName);
 
       const updateExpressionAttributeValue = {};
       const attributeValueName = `:${item}`;
       updateExpressionAttributeValue[attributeValueName] = data[item];
-      result.ExpressionAttributeValues =     // eslint-disable-line no-param-reassign
-        Object.assign({}, result.ExpressionAttributeValues, updateExpressionAttributeValue);
+      Object.assign(ExpressionAttributeValues, updateExpressionAttributeValue);
 
       result.UpdateExpression.push(`${attributeName} = ${attributeValueName}`);
     }
-    return result;
+    return Object.assign({}, result, { ExpressionAttributeNames }, { ExpressionAttributeValues });
   }, {
     ExpressionAttributeNames: {},
     ExpressionAttributeValues: {},
@@ -82,26 +116,15 @@ const updateStatus = (data) => {
   return dynamodb.update(params).promise();
 };
 
+/**
+ * Gets session by session id
+ * @param id
+ */
 const getStatus = (id) =>
   dynamodb.get({
     TableName: process.env.SESSION_TABLE_NAME,
     Key: {
       id,
-    },
-  }).promise();
-
-const getLabels = (id) =>
-  dynamodb.scan({
-    TableName: process.env.LABELS_TABLE_NAME,
-    ProjectionExpression: '#id, #frame, #labels',
-    FilterExpression: '#id = :id',
-    ExpressionAttributeNames: {
-      '#id': 'id',
-      '#frame': 'frame',
-      '#labels': 'labels',
-    },
-    ExpressionAttributeValues: {
-      ':id': id,
     },
   }).promise();
 

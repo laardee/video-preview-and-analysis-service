@@ -4,6 +4,13 @@ const { parseS3SNSEvent } = require('../../shared/helpers');
 const { createStatus } = require('../lib/database');
 const { sendMessage } = require('../../shared/snsQueue');
 
+/**
+ * Handles session creation
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {Promise.<TResult>}
+ */
 module.exports.handler = (event, context, callback) => {
   console.log(JSON.stringify(event, null, 2));
 

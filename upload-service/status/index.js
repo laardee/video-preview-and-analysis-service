@@ -2,11 +2,17 @@
 
 const { parseS3SNSEvent } = require('../../shared/helpers');
 const { updateSession } = require('../lib/database');
-
 const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3();
 
+/**
+ * Handles processing status
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {*}
+ */
 module.exports.handler = (event, context, callback) => {
   const {
     bucket,

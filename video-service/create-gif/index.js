@@ -27,6 +27,14 @@ const {
 
 const { getDuration } = require('../lib');
 
+/**
+ * Creates GIF animation from source video
+ * @param input
+ * @param output
+ * @param directory
+ * @param duration
+ * @returns {*}
+ */
 const createGif = ({ input, output, directory, duration }) => {
   const maxDuration =
     process.env.VIDEO_MAX_DURATION && process.env.VIDEO_MAX_DURATION > 0
@@ -42,10 +50,13 @@ const createGif = ({ input, output, directory, duration }) => {
       spawnPromise(spawn(ffmpeg(), (`-i ${path.join(directory, '%06d.png')} -vf setpts=50*PTS ${output}`).split(' '))));  // eslint-disable-line max-len
 };
 
-  // 10 seconds from start
-  // spawnPromise(spawn(ffmpeg(), (`-t 10 -i ${input} -vf scale=320:-1 ${output}`).split(' ')));
-  // -i ${file} -vf setpts=4*PTS ${path.join(directory, `preview-${session}.gif`)}
-
+/**
+ * Handles GIF creation
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {Promise.<TResult>}
+ */
 module.exports.handler = (event, context, callback) => {
   const {
     id,

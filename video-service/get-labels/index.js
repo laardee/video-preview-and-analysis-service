@@ -7,6 +7,13 @@ const { insertLabels } = require('../lib/database');
 
 const rekognition = new AWS.Rekognition();
 
+/**
+ * Handles label request to Amazon Rekognition
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {Promise.<TResult>}
+ */
 module.exports.handler =
   (event, context, callback) => {
     const message = JSON.parse(event.Records[0].Sns.Message);

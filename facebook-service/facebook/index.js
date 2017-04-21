@@ -8,6 +8,10 @@ const AWS = require('aws-sdk');
 
 const s3 = new AWS.S3();
 
+/**
+ * Gets signed URL
+ * @param filename
+ */
 const getSignedUrl = (filename) => new Promise((resolve, reject) => {
   s3.getSignedUrl('getObject', {
     Bucket: process.env.RENDER_BUCKET,
@@ -22,6 +26,13 @@ const getSignedUrl = (filename) => new Promise((resolve, reject) => {
   });
 });
 
+/**
+ * Handles messaging to Messenger Service
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {*}
+ */
 module.exports.handler = (event, context, callback) => {
   console.log(JSON.stringify(event, null, 2));
   if (event.httpMethod === 'GET') {

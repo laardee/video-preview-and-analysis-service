@@ -7,6 +7,12 @@ const path = require('path');
 
 const s3 = new AWS.S3();
 
+/**
+ * Creates Lambda integration response
+ * @param error
+ * @param data
+ * @returns response object
+ */
 const createResponse = (error, data) => {
   const statusCode = error ? 500 : 200;
   const body = error || data;
@@ -20,6 +26,13 @@ const createResponse = (error, data) => {
   };
 };
 
+/**
+ * Handles signed url endpoint
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {*}
+ */
 module.exports.handler =
   (event, context, callback) => {
     const { ext } = path.parse(event.queryStringParameters.file);

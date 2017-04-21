@@ -5,7 +5,6 @@ const fs = require('fs-extra');
 const BbPromise = require('bluebird');
 const spawn = require('child_process').spawn;
 const path = require('path');
-
 const { insertLabels, updateStatus } = require('../lib/database');
 const { parseSNSEvent } = require('../../shared/helpers');
 const { getDuration } = require('../lib');
@@ -15,7 +14,6 @@ const config = {
 };
 
 const s3 = new AWS.S3(config);
-
 const ensureDir = BbPromise.promisify(fs.ensureDir);
 const writeFile = BbPromise.promisify(fs.writeFile);
 const remove = BbPromise.promisify(fs.remove);
@@ -26,6 +24,13 @@ const {
   ffmpeg,
 } = require('../lib/spawn');
 
+/**
+ * Extract key frame captures
+ * @param input
+ * @param output
+ * @param duration
+ * @returns {*}
+ */
 const createCaptures = ({ input, output, duration }) => {
   const maxDuration =
     process.env.VIDEO_MAX_DURATION && process.env.VIDEO_MAX_DURATION > 0
@@ -38,6 +43,14 @@ const createCaptures = ({ input, output, duration }) => {
       (`-t ${maxDuration} -skip_frame nokey -i ${input} -vsync 0 -r 30 -vf scale=640:-1 ${output}`).split(' '))); // eslint-disable-line max-len
 };
 
+/**
+ * Saves capture to S3 Bucket
+ * @param bucket
+ * @param id
+ * @param base
+ * @param directory
+ * @param frame
+ */
 const saveCapture = ({ bucket, id, base, directory, frame }) =>
   s3.putObject({
     Bucket: bucket,
@@ -47,6 +60,13 @@ const saveCapture = ({ bucket, id, base, directory, frame }) =>
   })
     .promise();
 
+/**
+ * Handles captures
+ * @param event
+ * @param context
+ * @param callback
+ * @returns {Promise.<TResult>}
+ */
 module.exports.handler = (event, context, callback) => {
   const {
     id,
