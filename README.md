@@ -1,4 +1,4 @@
-# Serverless Video Service
+# Serverless Video Preview and Analysis Service
 
 This is a serverless event-driven service that generates labels and creates preview animation from a video file. The most common use case could be video bank for short or medium length videos that need to be labeled with previews when uploaded to service.
 
