@@ -3,6 +3,10 @@
 // change the API endpoint!
 const api = 'https://randomchars.execute-api.us-east-1.amazonaws.com/dev';
 
+const displayStatus =
+  (text) =>
+    $('#status').html(text);
+
 const uploadFile = ({ url, session, file }) =>
   new Promise((resolve) => {
     const reader = new FileReader();
@@ -39,9 +43,9 @@ const refreshContent = () => {
     } = JSON.parse(localStorage.getItem('video-session'));
 
     if (status === -1) {
-      $('#status').html('Failed to process video');
+      displayStatus('Failed to process video');
     } else {
-      $('#status').html(`${message} [${id}]`);
+      displayStatus(`${message} [${id}]`);
     }
 
     if (status === 1) {
@@ -59,32 +63,41 @@ const refreshContent = () => {
 };
 
 const insertSessionToLocalStorage = (data) => {
-  localStorage.setItem('video-session', JSON.stringify(data));
-  refreshContent();
+  if(data) {
+    localStorage.setItem('video-session', JSON.stringify(data));
+    refreshContent();
+  }
+
   return data;
 };
 
 const refreshMetadata = (session) =>
   getMetadata(session) // eslint-disable-line  no-use-before-define
-    .then(insertSessionToLocalStorage);
+    .then(insertSessionToLocalStorage)
+    .catch(() => displayStatus('Choose video to upload.'));
 
-const getMetadata = (session) =>
-  fetch(`${api}/metadata/${session}`)
-    .then(response => response.json())
-    .then((data) => {
-      if (data.status === 0) {
-        setTimeout(() => {
-          const id = getSessionId();
-          if (id) {
-            refreshMetadata(session);
-          }
-        }, 2000);
-      }
-      return data;
-    });
+const getMetadata = (session) => {
+  if (session) {
+    return fetch(`${api}/metadata/${session}`)
+      .then(response => response.json())
+      .then((data) => {
+        if (data.status === 0) {
+          setTimeout(() => {
+            const id = getSessionId();
+            if (id) {
+              refreshMetadata(session);
+            }
+          }, 5000);
+        }
+        return data;
+      });
+  }
+
+  return Promise.reject('no session');
+};
 
 $(() => {
-  refreshMetadata();
+  refreshMetadata(getSessionId());
 
   $('body').on('click', 'button.refresh', (event) => {
     const id = $(event.target).attr('id');
@@ -95,7 +108,8 @@ $(() => {
 
   $('#upload-video #video').change(() => {
     const file = $('#upload-video #video')[0].files[0];
-    $('#status').html(`Press Submit to upload ${file.name}`);
+    displayStatus(`Press Submit to upload ${file.name}`);
+    localStorage.setItem('video-session', JSON.stringify({}));
   });
 
   $('#upload-video')
@@ -113,3 +127,4 @@ $(() => {
         .then(console.log);
     });
 });
+
