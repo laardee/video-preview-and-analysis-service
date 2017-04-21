@@ -80,8 +80,6 @@ module.exports.handler = (event, context, callback) => {
         .promise())
     .then(() =>
       updateStatus({ id, video: key, gif }))
-    .then(() =>
-      snsQueue.sendMessage(process.env.STATUS_TOPIC, { message: { id } }))
     .then(() => callback(null, 'ok'))
     .catch((description) =>
       snsQueue.sendMessage(process.env.RENDER_READY_TOPIC_NAME, { message: { id, error: { description, code: 1 } } }) // eslint-disable-line max-len

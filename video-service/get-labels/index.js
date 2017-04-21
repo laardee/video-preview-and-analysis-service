@@ -2,7 +2,6 @@
 
 const AWS = require('aws-sdk');
 const path = require('path');
-const snsQueue = require('../../shared/snsQueue');
 
 const { insertLabels } = require('../lib/database');
 
@@ -27,9 +26,13 @@ module.exports.handler =
     };
 
     return rekognition.detectLabels(params).promise()
-      .then(data =>
-        insertLabels(Object.assign({ id, frame: base }, { labels: data.Labels })))
-      .then(() =>
-        snsQueue.sendMessage(process.env.STATUS_TOPIC, { message: { id } }))
-      .then(() => callback(null));
+      .then(data => {
+        const labels = data.Labels || [];
+        return insertLabels(Object.assign({ id, frame: base }, { labels }));
+      })
+      .then(() => callback(null))
+      .catch((error) => {
+        console.log(JSON.stringify(error));
+        callback(error);
+      });
   };

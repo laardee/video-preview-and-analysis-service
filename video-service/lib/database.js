@@ -24,6 +24,24 @@ const createStatus = (data) => {
   return dynamodb.put(params).promise();
 };
 
+const getOpenStatuses = () =>
+  dynamodb.scan({
+    TableName: process.env.SESSION_TABLE_NAME,
+    ProjectionExpression: '#id, #status, #video, #gif, #captures',
+    FilterExpression: '#status = :status AND #captures = :captures AND attribute_exists(#gif) ',
+    ExpressionAttributeNames: {
+      '#id': 'id',
+      '#status': 'status',
+      '#video': 'video',
+      '#gif': 'gif',
+      '#captures': 'captures',
+    },
+    ExpressionAttributeValues: {
+      ':status': 0,
+      ':captures': 1,
+    },
+  }).promise();
+
 const updateStatus = (data) => {
   const updateData = Object.keys(data).reduce((result, item) => {
     if (item !== 'id') {
@@ -90,6 +108,7 @@ const getLabels = (id) =>
 module.exports = {
   createStatus,
   updateStatus,
+  getOpenStatuses,
   insertLabels,
   getStatus,
   getLabels,

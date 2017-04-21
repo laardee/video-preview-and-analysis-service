@@ -5,6 +5,7 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 const { getSession } = require('../lib/database');
+const { sendMessage } = require('../../shared/snsQueue');
 
 const getSignedUrl = ({ key, bucket }) => new Promise((resolve, reject) => {
   s3.getSignedUrl('getObject', {
@@ -50,25 +51,33 @@ module.exports.handler = (event, context, callback) => {
         }
       }
 
-      return Promise.all(promises).then(([gifUrl, videoUrl]) => {
-        const response = {
-          statusCode: typeof status === 'undefined' || status > -1 ? 200 : 400,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
-          },
-          body: JSON.stringify({
-            id,
-            message,
-            status,
-            gifUrl,
-            videoUrl,
-            labels: data.labels,
-          }),
-        };
+      return Promise.all(promises)
+        .then(([gifUrl, videoUrl]) => {
+          const response = {
+            statusCode: typeof status === 'undefined' || status > -1 ? 200 : 400,
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Credentials': true,
+            },
+            body: JSON.stringify({
+              id,
+              message,
+              status,
+              gifUrl,
+              videoUrl,
+              labels: data.labels,
+            }),
+          };
 
-        return callback(null, response);
-      });
+          return callback(null, response);
+        })
+        .then(() => {
+          if (status === 0) {
+            return sendMessage(process.env.STATUS_TOPIC_NAME, { message: { id } });
+          }
+
+          return null;
+        });
     })
     .catch((error) => {
       const response = {

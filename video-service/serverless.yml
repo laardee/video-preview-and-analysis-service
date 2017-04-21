@@ -68,6 +68,7 @@ functions:
     timeout: 30
     events:
       - sns: ${self:provider.environment.STATUS_TOPIC}
+      - schedule: rate(1 minute)
   get-labels:
     handler: get-labels/index.handler
     timeout: 15
@@ -316,8 +317,8 @@ resources:
           - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
         TableName: ${self:provider.environment.SESSION_TABLE_NAME}
     LabelsTable:
       Type: AWS::DynamoDB::Table
@@ -334,6 +335,6 @@ resources:
           - AttributeName: frame
             KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+          ReadCapacityUnits: 10
+          WriteCapacityUnits: 10
         TableName: ${self:provider.environment.LABELS_TABLE_NAME}

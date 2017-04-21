@@ -6,7 +6,10 @@ const {
   getStatus,
   getLabels,
   updateStatus,
+  getOpenStatuses,
 } = require('../lib/database');
+
+const { parseSNSEvent } = require('../../shared/helpers');
 
 const config = {
   region: AWS.config.region || process.env.SERVERLESS_REGION || 'us-east-1',
@@ -14,29 +17,21 @@ const config = {
 
 const s3 = new AWS.S3(config);
 
-const checkIfLabelsExists = (labels) => {
-  let exists = true;
-  labels.forEach((label) => {
-    if (!label.labels) {
-      exists = false;
+const checkIfLabelsExists = (labels) =>
+  labels.reduce((result, label) => {
+    if (Object.keys(label).indexOf('labels') === -1) {
+      return false;
     }
-  });
-  return exists;
-};
+    return result;
+  }, true);
 
-
-module.exports.handler = (event, context, callback) => {
-  console.log(JSON.stringify(event, null, 2));
-  const { id } = JSON.parse(event.Records[0].Sns.Message);
-  const promises = [getStatus(id), getLabels(id)];
-  const metadataKey = `${id}/metadata.json`;
-
-  return Promise.all(promises)
-    .then(([statusItem, labelItems]) => {
-      const status = statusItem.Item;
-      const labels = labelItems.Items;
-
-      if (status.status === 0 && status.gif && status.captures === 1 && checkIfLabelsExists(labels)) {
+const saveMetadata = (session) =>
+  getLabels(session.id)
+    .then(({ Items: labels }) => {
+      if (session.status === 0
+        && session.gif
+        && session.captures === 1
+        && checkIfLabelsExists(labels)) {
         const allLabels = labels.reduce((result, labelsObject) => {
           labelsObject.labels.forEach((label) => {
             const existingLabel = result.filter((l) => l.Name === label.Name)[0];
@@ -54,31 +49,45 @@ module.exports.handler = (event, context, callback) => {
         }, [])
           .sort((a, b) => b.Confidence - a.Confidence);
 
-        console.log('status', JSON.stringify(status));
-        console.log('labels', JSON.stringify(labels));
-        console.log('all labels', JSON.stringify(allLabels));
-
-        return updateStatus({ id: status.id, status: 1 })
+        return updateStatus({ id: session.id, status: 1 })
           .then(() => ({
-            video: status.video,
-            gif: status.gif,
+            id: session.id,
+            video: session.video,
+            gif: session.gif,
             labels: allLabels,
           }));
       }
 
+      console.log(`session ${session.id} not ready yet`);
       return null;
     })
     .then((payload) => {
       if (payload) {
         return s3.putObject({
           Bucket: process.env.RENDER_BUCKET,
-          Key: metadataKey,
+          Key: `${payload.id}/metadata.json`,
           ContentType: 'application/json',
           Body: JSON.stringify(payload),
         }).promise();
       }
 
       return null;
-    })
+    });
+
+module.exports.handler = (event, context, callback) => {
+  console.log(JSON.stringify(event, null, 2));
+  if (event.Records && event.Records[0].Sns) {
+    // SNS Triggered
+    const { id } = parseSNSEvent(event);
+    return getStatus(id)
+      .then(({ Item: session }) => saveMetadata(session))
+      .then(() => callback(null, 'ok'));
+  }
+
+  // Scheduled
+  return getOpenStatuses()
+    .then(({ Items }) =>
+      Promise.all(Items.map(saveMetadata)))
     .then(() => callback(null, 'ok'));
 };
+

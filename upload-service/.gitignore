@@ -40,3 +40,5 @@ admin.env
 .env
 _meta
 .serverless
+
+_optimize
