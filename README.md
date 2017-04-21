@@ -2,7 +2,7 @@
 
 This is a serverless event-driven service that generates labels and creates preview animation from a video file. The most common use case could be video bank for short or medium length videos that need to be labeled with previews when uploaded to service.
 
-[FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) labels. 
+[FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) analysis. 
 
 This repository includes video service and two example use cases, upload service for uploading a video file from the browser and Facebook bot backend service.
 
