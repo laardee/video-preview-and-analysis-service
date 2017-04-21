@@ -33,7 +33,7 @@ This project is separated into three parts, video service that generates the gif
 2. User uploads video to S3 Bucket which triggers Video Service to start processing.
 3. Status function catches Render Ready SNS message when Video Service has finished processing video.
 4. The Status function gets metadata from Render Bucket and updates the session.
-5. User request metadata from Get Metadata Lambda function (at the time web sockets are not supported in API Gateway so polling is used).
+5. User request metadata from Get Metadata Lambda function (at the time web sockets are not supported in API Gateway so polling is used). It also sends Status SNS message if video processing is not ready yet.
 
 ### Facebook Service
 
