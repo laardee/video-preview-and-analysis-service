@@ -6,7 +6,7 @@ This is a serverless event-driven service that generates labels and creates prev
 
 This repository includes video service and two example use cases, upload service for uploading a video file from the browser and Facebook bot backend service.
 
-Live example: https://laardee.github.io/video-service-web/
+Live example: https://laardee.github.io/video-service-web/build/
 
 ## Architecture
 
