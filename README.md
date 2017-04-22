@@ -46,7 +46,9 @@ Messenger Service endpoint is verified using GET request to /facebook endpoint. 
 
 ## Installation & Deployment
 
-Run `npm install` in following directories
+**Installation**
+
+Clone or donwload this repository and run `npm install` in following directories
 
 * video-service
 * shared
@@ -57,18 +59,7 @@ Rename `example.secrets.yml` to `.secrets.yml` and change mock secrets to match 
 
 **Tip:** If you have aws-cli installed `aws sts get-caller-identity --output text --query 'Account'` displays AWS account id.
 
-### Facebook Service
-
-If you wish to use Facebook Service, set up the facebook app before deployment.
-
-* Create Facebook application -> https://developers.facebook.com/quickstarts/?platform=web
-* Create Facebook page -> https://www.facebook.com/pages/create
-
-Copy the page access token and add it to .secrets.yml. as `FACEBOOK_BOT_PAGE_ACCESS_TOKEN`. Also, modify the `FACEBOOK_BOT_VERIFY_TOKEN` as you like.
-
-After deployment set up the webhook using Facebook Service endpoint, something like `https://randomchars.execute-api.us-east-1.amazonaws.com/dev/facebook`. Serverless framework displays it after deployment or alternatively go to the `facebook-service` directory and run `sls info`.
-
-## Deployment
+**Deployment**
 
 Upload service and facebook service depends on video service, so it needs to be deployed first.  To deploy all services run `./deploy.sh` located in project root directory. 
 
@@ -82,6 +73,18 @@ There is a very simple [React web application](https://github.com/laardee/video-
 3. Run `npm start` to start a local server.
 
 Live example: https://laardee.github.io/video-service-web/build/
+
+### Facebook Service
+
+If you wish to use Facebook Service, set up the facebook app before deployment.
+
+* Create Facebook application -> https://developers.facebook.com/quickstarts/?platform=web
+* Create Facebook page -> https://www.facebook.com/pages/create
+
+Copy the page access token and add it to .secrets.yml. as `FACEBOOK_BOT_PAGE_ACCESS_TOKEN`. Also, modify the `FACEBOOK_BOT_VERIFY_TOKEN` as you like.
+
+After deployment set up the webhook using Facebook Service endpoint, something like `https://randomchars.execute-api.us-east-1.amazonaws.com/dev/facebook`. Serverless framework displays it after deployment or alternatively go to the `facebook-service` directory and run `sls info`.
+
 
 **License**
 
