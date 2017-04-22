@@ -48,7 +48,7 @@ Messenger Service endpoint is verified using GET request to /facebook endpoint. 
 
 **Installation**
 
-Clone or donwload this repository and run `npm install` in following directories
+Clone or download this repository and run `npm install` in following directories
 
 * video-service
 * shared
