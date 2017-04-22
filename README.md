@@ -6,8 +6,6 @@ This is a serverless event-driven service that generates labels and creates prev
 
 This repository includes video service and two example use cases, upload service for uploading a video file from the browser and Facebook bot backend service.
 
-Live example: https://laardee.github.io/video-service-web/build/
-
 ## Architecture
 
 This project is separated into three parts, video service that generates the gif preview and labels and two optional example services that use the video service.
@@ -78,8 +76,12 @@ When deleting resources from AWS, reversed order should be used. First upload se
 
 ### Upload Service
 
-Upload service contains a REST API and a very simple web page that can be used to test Video Service. After Upload Service deployment, change the `api` variable in the `upload-service/www/app.js` file to point upload service API endpoint. Run `npm start server` to start local test server.
+There is a very simple [React web application](https://github.com/laardee/video-service-web) that can be used to test upload service. 
+1. Clone or download the service and run `npm install` or `yarn`. 
+2. Change the `endpoint` in the `src/config` file to point your upload service API endpoint. 
+3. Run `npm start` to start a local server.
 
+Live example: https://laardee.github.io/video-service-web/build/
 
 **License**
 
