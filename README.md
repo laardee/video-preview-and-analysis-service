@@ -1,5 +1,7 @@
 # Serverless Video Preview and Analysis Service
 
+[![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
+
 This is a serverless event-driven service that generates labels and creates preview animation from a video file. The most common use case could be video bank for short or medium length videos that need to be labeled with previews when uploaded to service.
 
 [FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) analysis. 
@@ -89,3 +91,5 @@ After deployment set up the webhook using Facebook Service endpoint, something l
 **License**
 
 Copyright (c) 2017 Eetu Tuomala, licensed for users and contributors under [MIT license](https://github.com/laardee/video-service/blob/master/LICENSE).
+
+<a href="https://sc5.io/careers"><img src="https://sc5.io/wp-content/themes/sc5/dist/images/sc5logo-fill-red.svg" alt="sc5 logo" width="45" height="50"> sc5.io/careers</a>
