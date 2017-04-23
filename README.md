@@ -92,4 +92,4 @@ After deployment set up the webhook using Facebook Service endpoint, something l
 
 Copyright (c) 2017 Eetu Tuomala, licensed for users and contributors under [MIT license](https://github.com/laardee/video-service/blob/master/LICENSE).
 
-<a href="https://sc5.io/careers"><img src="https://sc5.io/wp-content/themes/sc5/dist/images/sc5logo-fill-red.svg" alt="sc5 logo" width="45" height="50"><span style="line-height: 50px; vertical-align: top; margin-left: 10px">sc5.io/careers</span></a>
+<a href="https://sc5.io/careers"><img src="https://sc5.io/wp-content/themes/sc5/dist/images/sc5logo-fill-red.svg" alt="sc5 logo" width="45" height="50"><b style="line-height: 50px; vertical-align: top; margin-left: 10px">sc5.io/careers</b></a>
