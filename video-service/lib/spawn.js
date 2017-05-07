@@ -7,18 +7,22 @@ const path = require('path');
  * @param spawnProcess
  */
 const spawnPromise = (spawnProcess) => new Promise((resolve, reject) => {
+  let stdout = '';
+  let stderr = '';
   spawnProcess.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`);
+    stdout += data;
   });
 
   spawnProcess.stderr.on('data', (data) => {
     console.log(`stderr: ${data}`);
+    stderr += data;
   });
 
   spawnProcess.on('close', (code) => {
     console.log(`child process exited with code ${code}`);
     if (code === 0) {
-      return resolve();
+      return resolve({ stdout, stderr });
     }
     return reject(code);
   });
