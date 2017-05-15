@@ -1,7 +1,8 @@
 'use strict';
 
 const exec = require('child_process').exec;
-const { ffprobe } = require('./spawn');
+const spawn = require('child_process').spawn;
+const { ffprobe, spawnPromise } = require('./spawn');
 
 /**
  * Probes video format with FFPROBE
@@ -13,6 +14,10 @@ const probeVideo = (input) => new Promise((resolve) => {
     resolve(JSON.parse(stdout));
   });
 });
+
+const probe = (params) =>
+  spawnPromise(spawn(ffprobe(), (params).split(' ')))
+    .then(({ stdout }) => stdout);
 
 /**
  * Returns video duration in seconds
@@ -30,5 +35,6 @@ const getDuration = (input) =>
 
 module.exports = {
   probeVideo,
+  probe,
   getDuration,
 };

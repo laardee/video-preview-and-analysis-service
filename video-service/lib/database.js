@@ -21,17 +21,63 @@ const insertLabels = (data) => {
 };
 
 /**
+ * Updates labels
+ * @param data
+ */
+const updateLabels = (data) => {
+  const updateData = Object.keys(data).reduce((result, item) => {
+    const ExpressionAttributeNames = Object.assign({}, result.ExpressionAttributeNames);
+    const ExpressionAttributeValues = Object.assign({}, result.ExpressionAttributeValues);
+    if (item !== 'id' && item !== 'frame') {
+      const updateExpressionAttributeName = {};
+      const attributeName = `#${item}`;
+      updateExpressionAttributeName[attributeName] = item;
+      Object.assign(ExpressionAttributeNames, updateExpressionAttributeName);
+
+      const updateExpressionAttributeValue = {};
+      const attributeValueName = `:${item}`;
+      updateExpressionAttributeValue[attributeValueName] = data[item];
+      Object.assign(ExpressionAttributeValues, updateExpressionAttributeValue);
+
+      result.UpdateExpression.push(`${attributeName} = ${attributeValueName}`);
+    }
+    return Object.assign({}, result, { ExpressionAttributeNames }, { ExpressionAttributeValues });
+  }, {
+    ExpressionAttributeNames: {},
+    ExpressionAttributeValues: {},
+    UpdateExpression: [],
+  });
+
+  const params = Object.assign({
+    TableName: process.env.LABELS_TABLE_NAME,
+    Key: {
+      id: data.id,
+      frame: data.frame,
+    },
+    ReturnValues: 'ALL_NEW',
+  }, {
+    ExpressionAttributeNames: updateData.ExpressionAttributeNames,
+    ExpressionAttributeValues: updateData.ExpressionAttributeValues,
+    UpdateExpression: `set ${updateData.UpdateExpression.join(', ')}`,
+  });
+
+  console.log('update', JSON.stringify(params));
+  return dynamodb.update(params).promise();
+};
+
+/**
  * Returns labels
  * @param id
  */
 const getLabels = (id) =>
   dynamodb.scan({
     TableName: process.env.LABELS_TABLE_NAME,
-    ProjectionExpression: '#id, #frame, #labels',
+    ProjectionExpression: '#id, #frame, #time, #labels',
     FilterExpression: '#id = :id',
     ExpressionAttributeNames: {
       '#id': 'id',
       '#frame': 'frame',
+      '#time': 'time',
       '#labels': 'labels',
     },
     ExpressionAttributeValues: {
@@ -132,7 +178,8 @@ module.exports = {
   createStatus,
   updateStatus,
   getOpenStatuses,
-  insertLabels,
   getStatus,
+  insertLabels,
+  updateLabels,
   getLabels,
 };

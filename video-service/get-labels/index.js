@@ -3,7 +3,7 @@
 const AWS = require('aws-sdk');
 const path = require('path');
 
-const { insertLabels } = require('../lib/database');
+const { updateLabels } = require('../lib/database');
 
 const rekognition = new AWS.Rekognition();
 
@@ -35,7 +35,7 @@ module.exports.handler =
     return rekognition.detectLabels(params).promise()
       .then(data => {
         const labels = data.Labels || [];
-        return insertLabels(Object.assign({ id, frame: base }, { labels }));
+        return updateLabels(Object.assign({ id, frame: base }, { labels }));
       })
       .then(() => callback(null))
       .catch((error) => {

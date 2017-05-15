@@ -63,6 +63,7 @@ const saveMetadata = (session) =>
             video: session.video,
             gif: session.gif,
             labels: allLabels,
+            raw: labels,
           }));
       }
 
