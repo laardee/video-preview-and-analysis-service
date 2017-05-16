@@ -70,7 +70,7 @@ module.exports.handler = (event, context, callback) => {
                   message.sendGif(sender, { gif: signedUrl }))
                 .then(() => {
                   const text =
-                    metadata.labels
+                    metadata.allLabels
                       .map((label) => label.Name)
                       .join(', ');
                   return message.sendMessage(sender, { text });
