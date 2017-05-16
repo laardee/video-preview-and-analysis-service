@@ -78,6 +78,7 @@ module.exports.handler = (event, context, callback) => {
               gifUrl,
               videoUrl,
               labels: data.labels,
+              allLabels: data.allLabels,
             }),
           };
 
