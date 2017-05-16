@@ -33,7 +33,7 @@ const probeKeyframes = input =>
     .then(data => JSON.parse(data))
     .then(({ frames }) =>
       frames
-        .filter(({ key_frame }) => key_frame === 1)
+        .filter(({ key_frame }) => key_frame === 1) // eslint-disable-line camelcase
         .map(frame => ({ time: parseFloat(frame.pkt_pts_time) })));
 
 /**
@@ -120,7 +120,7 @@ module.exports.handler = (event, context, callback) => {
               frame,
             }).then(() => {
               const index = parseInt(frame.substr(frame.lastIndexOf('-') + 1), 10) - 1;
-              return insertLabels({ id, frame, time: timestamps[index].time })
+              return insertLabels({ id, frame, time: timestamps[index].time });
             }));
       return Promise.all(promises);
     })
