@@ -2,15 +2,17 @@
 
 [![serverless](http://public.serverless.com/badges/v3.svg)](http://www.serverless.com)
 
-This is a serverless event-driven service that generates labels and creates preview animation from a video file. The most common use case could be video bank for short or medium length videos that need to be labeled with previews when uploaded to service.
+This is a serverless event-driven service that generates labels and creates preview animation from a video file. The most common use case could be a stock video service for short or medium length videos that need to be labeled with previews when uploaded to service.
 
 [FFMPEG](https://ffmpeg.org/) is used to create the preview and capturing the keyframes for [Amazon Rekognition](https://aws.amazon.com/rekognition/) analysis. 
 
 This repository includes video service and two example use cases, upload service for uploading a video file from the browser and Facebook bot backend service.
 
+Read a short review of the project from [A Cloud Guru blog post](https://read.acloud.guru/announcing-the-winners-of-the-inaugural-serverlessconf-architecture-competition-1dce2db6da3#1ab0).
+
 ## Architecture
 
-This project is separated into three parts, video service that generates the gif preview and labels and two optional example services that use the video service.
+This project is separated into three parts, video service that generates a GIF preview and detects objects, and two example services that use the video service.
 
 ### Video Service
 
@@ -37,7 +39,7 @@ This project is separated into three parts, video service that generates the gif
 
 ### Facebook Service
 
-![Upload Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/facebook-service.png)
+![Messenger Bot Service Architecture](https://raw.githubusercontent.com/laardee/video-service/master/images/facebook-service.png)
 
 1. Messenger bot user records video and sends it to Messenger service. The video is saved to Facebook CDN and Messenger Service passes the message that contains URL to the video file to API Gateway that triggers Facebook Lambda function.
 2. Facebook Lambda creates a session and sends Download SNS message. After that, it returns ok message to Messenger Service.
@@ -87,9 +89,6 @@ Copy the page access token and add it to .secrets.yml. as `FACEBOOK_BOT_PAGE_ACC
 
 After deployment set up the webhook using Facebook Service endpoint, something like `https://randomchars.execute-api.us-east-1.amazonaws.com/dev/facebook`. Serverless framework displays it after deployment or alternatively go to the `facebook-service` directory and run `sls info`.
 
-
 **License**
 
 Copyright (c) 2017 Eetu Tuomala, licensed for users and contributors under [MIT license](https://github.com/laardee/video-service/blob/master/LICENSE).
-
-<a href="https://sc5.io/careers"><img src="https://sc5.io/wp-content/themes/sc5/dist/images/sc5logo-fill-red.svg" alt="sc5 logo" width="50" height="15"><b>sc5.io/careers</b></a>
